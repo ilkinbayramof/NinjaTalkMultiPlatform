@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.ilkinbayramov.ninjatalk.ui.settings.SettingsScreen
 import com.ilkinbayramov.ninjatalk.ui.shuffle.ShuffleScreen
 import com.ilkinbayramov.ninjatalk.ui.theme.*
 
@@ -38,7 +39,7 @@ fun MainRoute() {
                 MainTab.Chat -> PlaceholderTab("Sohbet")
                 MainTab.Shuffle -> ShuffleScreen()
                 MainTab.Premium -> PlaceholderTab("Premium")
-                MainTab.Profile -> PlaceholderTab("Profil")
+                MainTab.Profile -> SettingsScreen()
             }
         }
     }

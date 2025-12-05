@@ -5,8 +5,12 @@ import com.ilkinbayramov.ninjatalk.core.mvi.MviViewModel
 import com.ilkinbayramov.ninjatalk.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 
+import com.ilkinbayramov.ninjatalk.data.TokenManager
+
 class LoginViewModel(private val authRepository: AuthRepository) :
         MviViewModel<LoginUiEvent, LoginUiState, LoginUiEffect>(initialState = LoginUiState()) {
+    
+    private val tokenManager = TokenManager()
 
     override fun onEvent(event: LoginUiEvent) {
         when (event) {
@@ -43,6 +47,7 @@ class LoginViewModel(private val authRepository: AuthRepository) :
             authRepository
                     .login(email = state.email, password = state.password)
                     .onSuccess { response ->
+                        tokenManager.saveToken(response.token)
                         setState { copy(isLoading = false) }
                         sendEffect { LoginUiEffect.NavigateToHome }
                     }

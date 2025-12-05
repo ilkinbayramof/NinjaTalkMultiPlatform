@@ -20,179 +20,169 @@ import androidx.compose.ui.unit.sp
 import com.ilkinbayramov.ninjatalk.ui.shuffle.filter.ShuffleFilterBottomSheet
 import com.ilkinbayramov.ninjatalk.ui.theme.*
 
-data class MockUser(val name: String, val age: Int, val gender: String, val bio: String)
+import com.ilkinbayramov.ninjatalk.data.dto.User
+import com.ilkinbayramov.ninjatalk.data.repository.UserRepository
+import com.ilkinbayramov.ninjatalk.presentation.shuffle.ShuffleUiEvent
+import com.ilkinbayramov.ninjatalk.presentation.shuffle.ShuffleViewModel
 
 @Composable
 fun ShuffleScreen() {
-        var searchQuery by remember { mutableStateOf("") }
-        var showFilterSheet by remember { mutableStateOf(false) }
+    val viewModel = remember { ShuffleViewModel(UserRepository()) }
+    val state by viewModel.uiState.collectAsState()
+    var showFilterSheet by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
-        // Mock users
-        val mockUsers = remember {
-                listOf(
-                        MockUser(
-                                "Ayşe",
-                                26,
-                                "Kadın",
-                                "Seyahat etmeyi ve yeni insanlarla tanışmayı seviyorum 🌍"
-                        ),
-                        MockUser(
-                                "Mehmet",
-                                29,
-                                "Erkek",
-                                "Müzik dinlemeyi ve spor yapmayı seviyorum 🎵⚽"
-                        ),
-                        MockUser(
-                                "Zeynep",
-                                24,
-                                "Kadın",
-                                "Kitap okumayı ve kahve içmeyi seviyorum ☕📚"
-                        )
-                )
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            // Handle effects if needed
         }
+    }
 
-        // Filtered users based on search
-        val filteredUsers =
-                remember(searchQuery, mockUsers) {
-                        if (searchQuery.isBlank()) {
-                                mockUsers
-                        } else {
-                                mockUsers.filter {
-                                        it.name.contains(searchQuery, ignoreCase = true)
-                                }
-                        }
-                }
+    if (showFilterSheet) {
+        ShuffleFilterBottomSheet(
+            onDismiss = { showFilterSheet = false },
+            onApplyFilters = { filters ->
+                // TODO: Apply complex filters
+                showFilterSheet = false
+            }
+        )
+    }
 
-        if (showFilterSheet) {
-                ShuffleFilterBottomSheet(
-                        onDismiss = { showFilterSheet = false },
-                        onApplyFilters = { filters ->
-                                // TODO: Apply filters
-                                showFilterSheet = false
-                        }
-                )
-        }
-
+    Scaffold(
+        containerColor = NinjaBackground,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
         Column(
-                modifier =
-                        Modifier.fillMaxSize()
-                                .background(NinjaBackground)
-                                .padding(horizontal = 16.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp)
         ) {
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                        text = "Keşfet",
-                        color = Color.White,
-                        style =
-                                MaterialTheme.typography.headlineSmall.copy(
-                                        fontWeight = FontWeight.Bold
-                                ),
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+            Text(
+                text = "Keşfet",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Search TextField
+            OutlinedTextField(
+                value = state.searchQuery,
+                onValueChange = { viewModel.onEvent(ShuffleUiEvent.SearchQueryChanged(it)) },
+                placeholder = { Text("Kullanıcı adı ara…", color = NinjaTextSecondary) },
+                singleLine = true,
+                shape = RoundedCornerShape(50),
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = NinjaSurface,
+                    unfocusedContainerColor = NinjaSurface,
+                    cursorColor = NinjaPrimary,
+                    focusedBorderColor = NinjaPrimary,
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
                 )
+            )
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-                // Search TextField
-                OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        placeholder = { Text("Kullanıcı adı ara…", color = NinjaTextSecondary) },
-                        singleLine = true,
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier.fillMaxWidth(),
-                        colors =
-                                OutlinedTextFieldDefaults.colors(
-                                        focusedContainerColor = NinjaSurface,
-                                        unfocusedContainerColor = NinjaSurface,
-                                        cursorColor = NinjaPrimary,
-                                        focusedBorderColor = NinjaPrimary,
-                                        unfocusedBorderColor = Color.Transparent,
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color.White
-                                )
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Filter Button
-                Surface(
-                        shape = RoundedCornerShape(50),
-                        color = NinjaSurface,
-                        modifier = Modifier.height(44.dp).wrapContentWidth(),
-                        onClick = { showFilterSheet = true }
+            // Filter Button
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = NinjaSurface,
+                modifier = Modifier.height(44.dp).wrapContentWidth(),
+                onClick = { showFilterSheet = true }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 18.dp)
                 ) {
-                        Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 18.dp)
-                        ) {
-                                Icon(
-                                        imageVector = Icons.Default.FilterList,
-                                        contentDescription = null,
-                                        tint = NinjaTextSecondary
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = "Filtrele", color = Color.White)
-                        }
+                    Icon(
+                        imageVector = Icons.Default.FilterList,
+                        contentDescription = null,
+                        tint = NinjaTextSecondary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Filtrele", color = Color.White)
                 }
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                // User List
+            if (state.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = NinjaPrimary)
+                }
+            } else {
                 LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxSize()
-                ) { items(filteredUsers) { user -> UserCard(user) } }
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(state.filteredUsers) { user ->
+                        UserCard(user)
+                    }
+                }
+            }
         }
+    }
 }
 
 @Composable
-private fun UserCard(user: MockUser) {
-        Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = NinjaSurface,
-                modifier = Modifier.fillMaxWidth()
+private fun UserCard(user: User) {
+    // Derive name from email for now
+    val displayName = user.email.substringBefore("@").replaceFirstChar { it.uppercase() }
+
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = NinjaSurface,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-                Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                ) {
-                        // Avatar
-                        Box(
-                                modifier =
-                                        Modifier.size(60.dp)
-                                                .clip(CircleShape)
-                                                .background(NinjaPrimary),
-                                contentAlignment = Alignment.Center
-                        ) {
-                                Text(
-                                        text = user.name.first().toString(),
-                                        color = Color.White,
-                                        fontSize = 24.sp,
-                                        fontWeight = FontWeight.Bold
-                                )
-                        }
+            // Avatar
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(CircleShape)
+                    .background(NinjaPrimary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = displayName.firstOrNull()?.toString() ?: "?",
+                    color = Color.White,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
-                        Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-                        // Info
-                        Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                        text = user.name,
-                                        color = Color.White,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.SemiBold
-                                )
+            // Info
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = displayName,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
 
-                                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-                                Text(
-                                        text = user.bio,
-                                        color = NinjaTextSecondary,
-                                        fontSize = 14.sp,
-                                        maxLines = 2
-                                )
-                        }
-                }
+                Text(
+                    text = user.bio ?: "Henüz bir biyografi yok.",
+                    color = NinjaTextSecondary,
+                    fontSize = 14.sp,
+                    maxLines = 2
+                )
+            }
         }
+    }
 }

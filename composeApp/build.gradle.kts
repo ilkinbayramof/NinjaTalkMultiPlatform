@@ -39,6 +39,9 @@ kotlin {
             // Hilt
             implementation(libs.hilt.android)
             implementation(libs.hilt.navigation.compose)
+
+            // Security
+            implementation(libs.androidx.security.crypto)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

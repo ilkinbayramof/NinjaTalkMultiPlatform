@@ -5,10 +5,14 @@ import com.ilkinbayramov.ninjatalk.core.mvi.MviViewModel
 import com.ilkinbayramov.ninjatalk.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 
+import com.ilkinbayramov.ninjatalk.data.TokenManager
+
 class RegisterViewModel(private val authRepository: AuthRepository) :
         MviViewModel<RegisterUiEvent, RegisterUiState, RegisterUiEffect>(
                 initialState = RegisterUiState()
         ) {
+
+    private val tokenManager = TokenManager()
 
     override fun onEvent(event: RegisterUiEvent) {
         when (event) {
@@ -105,6 +109,7 @@ class RegisterViewModel(private val authRepository: AuthRepository) :
                             birthDate = birthDateString
                     )
                     .onSuccess { response ->
+                        tokenManager.saveToken(response.token)
                         setState { copy(isLoading = false) }
                         sendEffect { RegisterUiEffect.NavigateToHome }
                     }
