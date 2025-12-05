@@ -6,8 +6,10 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
+expect fun getPlatformBaseUrl(): String
+
 object ApiClient {
-    private const val BASE_URL = "http://10.0.2.2:8080" // Android emulator localhost
+    private val BASE_URL = getPlatformBaseUrl()
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {

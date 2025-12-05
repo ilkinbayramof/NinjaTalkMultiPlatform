@@ -21,9 +21,9 @@ import com.ilkinbayramov.ninjatalk.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShuffleFilterBottomSheet(
-        viewModel: ShuffleFilterViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
         onDismiss: () -> Unit,
-        onApplyFilters: (ShuffleFilterState) -> Unit
+        onApplyFilters: (ShuffleFilterState) -> Unit,
+        viewModel: ShuffleFilterViewModel = ShuffleFilterViewModel()
 ) {
         val state by viewModel.uiState.collectAsState()
 

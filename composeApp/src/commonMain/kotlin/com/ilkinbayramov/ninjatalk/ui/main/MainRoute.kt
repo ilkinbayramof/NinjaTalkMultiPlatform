@@ -88,7 +88,7 @@ private fun BottomBar(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit) {
 @Composable
 private fun BottomItem(tab: MainTab, isSelected: Boolean, onClick: () -> Unit) {
     Column(
-            modifier = Modifier.width(70.dp).clickable { onClick() },
+            modifier = Modifier.width(70.dp).clickable(onClick = onClick),
             horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
