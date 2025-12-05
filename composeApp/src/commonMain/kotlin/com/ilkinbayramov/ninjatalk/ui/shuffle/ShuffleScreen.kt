@@ -51,6 +51,18 @@ fun ShuffleScreen() {
                 )
         }
 
+        // Filtered users based on search
+        val filteredUsers =
+                remember(searchQuery, mockUsers) {
+                        if (searchQuery.isBlank()) {
+                                mockUsers
+                        } else {
+                                mockUsers.filter {
+                                        it.name.contains(searchQuery, ignoreCase = true)
+                                }
+                        }
+                }
+
         if (showFilterSheet) {
                 ShuffleFilterBottomSheet(
                         onDismiss = { showFilterSheet = false },
@@ -130,7 +142,7 @@ fun ShuffleScreen() {
                 LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
-                ) { items(mockUsers) { user -> UserCard(user) } }
+                ) { items(filteredUsers) { user -> UserCard(user) } }
         }
 }
 
