@@ -2,10 +2,9 @@ package com.ilkinbayramov.ninjatalk.presentation.auth
 
 import androidx.lifecycle.viewModelScope
 import com.ilkinbayramov.ninjatalk.core.mvi.MviViewModel
+import com.ilkinbayramov.ninjatalk.data.TokenManager
 import com.ilkinbayramov.ninjatalk.data.repository.AuthRepository
 import kotlinx.coroutines.launch
-
-import com.ilkinbayramov.ninjatalk.data.TokenManager
 
 class RegisterViewModel(private val authRepository: AuthRepository) :
         MviViewModel<RegisterUiEvent, RegisterUiState, RegisterUiEffect>(
@@ -110,6 +109,7 @@ class RegisterViewModel(private val authRepository: AuthRepository) :
                     )
                     .onSuccess { response ->
                         tokenManager.saveToken(response.token)
+                        com.ilkinbayramov.ninjatalk.utils.TokenManager.setUserId(response.userId)
                         setState { copy(isLoading = false) }
                         sendEffect { RegisterUiEffect.NavigateToHome }
                     }

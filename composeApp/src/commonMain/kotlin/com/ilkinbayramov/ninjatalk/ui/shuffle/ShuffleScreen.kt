@@ -1,6 +1,7 @@
 package com.ilkinbayramov.ninjatalk.ui.shuffle
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,7 +27,7 @@ import com.ilkinbayramov.ninjatalk.ui.shuffle.filter.ShuffleFilterBottomSheet
 import com.ilkinbayramov.ninjatalk.ui.theme.*
 
 @Composable
-fun ShuffleScreen() {
+fun ShuffleScreen(onUserClick: (User) -> Unit = {}) {
     val viewModel = remember { ShuffleViewModel(UserRepository()) }
     val state by viewModel.uiState.collectAsState()
     var showFilterSheet by remember { mutableStateOf(false) }
@@ -120,21 +121,25 @@ fun ShuffleScreen() {
                 LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
-                ) { items(state.filteredUsers) { user -> UserCard(user) } }
+                ) {
+                    items(state.filteredUsers) { user ->
+                        UserCard(user = user, onClick = { onUserClick(user) })
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun UserCard(user: User) {
+private fun UserCard(user: User, onClick: () -> Unit = {}) {
     // Derive name from email for now
     val displayName = user.email.substringBefore("@").replaceFirstChar { it.uppercase() }
 
     Surface(
             shape = RoundedCornerShape(16.dp),
             color = NinjaSurface,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             // Avatar

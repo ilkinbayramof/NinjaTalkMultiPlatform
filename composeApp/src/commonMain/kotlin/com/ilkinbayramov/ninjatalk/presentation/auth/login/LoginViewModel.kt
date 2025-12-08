@@ -2,14 +2,13 @@ package com.ilkinbayramov.ninjatalk.presentation.auth.login
 
 import androidx.lifecycle.viewModelScope
 import com.ilkinbayramov.ninjatalk.core.mvi.MviViewModel
+import com.ilkinbayramov.ninjatalk.data.TokenManager
 import com.ilkinbayramov.ninjatalk.data.repository.AuthRepository
 import kotlinx.coroutines.launch
 
-import com.ilkinbayramov.ninjatalk.data.TokenManager
-
 class LoginViewModel(private val authRepository: AuthRepository) :
         MviViewModel<LoginUiEvent, LoginUiState, LoginUiEffect>(initialState = LoginUiState()) {
-    
+
     private val tokenManager = TokenManager()
 
     override fun onEvent(event: LoginUiEvent) {
@@ -48,6 +47,7 @@ class LoginViewModel(private val authRepository: AuthRepository) :
                     .login(email = state.email, password = state.password)
                     .onSuccess { response ->
                         tokenManager.saveToken(response.token)
+                        com.ilkinbayramov.ninjatalk.utils.TokenManager.setUserId(response.userId)
                         setState { copy(isLoading = false) }
                         sendEffect { LoginUiEffect.NavigateToHome }
                     }

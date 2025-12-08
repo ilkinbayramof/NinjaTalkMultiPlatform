@@ -13,9 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.ilkinbayramov.ninjatalk.data.repository.ChatRepository
+import com.ilkinbayramov.ninjatalk.ui.chat.ChatListScreen
+import com.ilkinbayramov.ninjatalk.ui.chat.InboxScreen
 import com.ilkinbayramov.ninjatalk.ui.settings.SettingsScreen
 import com.ilkinbayramov.ninjatalk.ui.shuffle.ShuffleScreen
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.utils.TokenManager
+import kotlinx.coroutines.launch
 
 sealed class MainTab(val route: String, val label: String, val icon: ImageVector) {
     object Chat : MainTab("chat", "Sohbet", Icons.Default.Chat)
@@ -27,19 +32,86 @@ sealed class MainTab(val route: String, val label: String, val icon: ImageVector
 @Composable
 fun MainRoute() {
     var selectedTab by remember { mutableStateOf<MainTab>(MainTab.Shuffle) }
+    var currentConversationId by remember { mutableStateOf<String?>(null) }
+    var currentConversationName by remember { mutableStateOf("Anonim Sohbet") }
+    val scope = rememberCoroutineScope()
+    val chatRepository = remember { ChatRepository() }
 
     Scaffold(
             containerColor = NinjaBackground,
             bottomBar = {
-                BottomBar(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
+                // Hide bottom bar when in inbox
+                if (currentConversationId == null) {
+                    BottomBar(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
+                }
             }
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
-            when (selectedTab) {
-                MainTab.Chat -> PlaceholderTab("Sohbet")
-                MainTab.Shuffle -> ShuffleScreen()
-                MainTab.Premium -> PlaceholderTab("Premium")
-                MainTab.Profile -> SettingsScreen()
+            when {
+                currentConversationId != null -> {
+                    InboxScreen(
+                            conversationId = currentConversationId!!,
+                            conversationName = currentConversationName,
+                            onBackClick = { currentConversationId = null }
+                    )
+                }
+                else -> {
+                    when (selectedTab) {
+                        MainTab.Chat ->
+                                ChatListScreen(
+                                        onConversationClick = { conversationId ->
+                                            // Get conversation from list to get name
+                                            scope.launch {
+                                                val token = TokenManager.getToken()
+                                                if (token != null) {
+                                                    chatRepository.getConversations(token)
+                                                            .onSuccess { conversations ->
+                                                                val conversation =
+                                                                        conversations.find {
+                                                                            it.id == conversationId
+                                                                        }
+                                                                currentConversationName =
+                                                                        conversation
+                                                                                ?.otherUserAnonymousName
+                                                                                ?: "Anonim Sohbet"
+                                                                currentConversationId =
+                                                                        conversationId
+                                                            }
+                                                }
+                                            }
+                                        }
+                                )
+                        MainTab.Shuffle ->
+                                ShuffleScreen(
+                                        onUserClick = { user ->
+                                            // Create or get conversation and navigate to inbox
+                                            // Use real name since user is initiating the chat
+                                            val realName =
+                                                    user.email.substringBefore("@")
+                                                            .replaceFirstChar { it.uppercase() }
+                                            scope.launch {
+                                                val token = TokenManager.getToken()
+                                                if (token != null) {
+                                                    chatRepository
+                                                            .createConversation(user.id, token)
+                                                            .onSuccess { conversationId ->
+                                                                currentConversationName = realName
+                                                                currentConversationId =
+                                                                        conversationId
+                                                            }
+                                                            .onFailure { error ->
+                                                                println(
+                                                                        "Error creating conversation: ${error.message}"
+                                                                )
+                                                            }
+                                                }
+                                            }
+                                        }
+                                )
+                        MainTab.Premium -> PlaceholderTab("Premium")
+                        MainTab.Profile -> SettingsScreen()
+                    }
+                }
             }
         }
     }
