@@ -11,6 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(onLogout: () -> Unit = {}) {
@@ -165,6 +168,14 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
 
                 // Render filtered settings
                 var notificationsEnabled by remember { mutableStateOf(true) }
+                val scope = rememberCoroutineScope()
+
+                // Load notification setting on start
+                LaunchedEffect(Unit) {
+                        notificationsEnabled =
+                                com.ilkinbayramov.ninjatalk.utils.TokenManager
+                                        .getNotificationsEnabled()
+                }
 
                 filteredSettings.forEach { category ->
                         SectionTitle(category.title)
@@ -175,7 +186,16 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                                                 icon = item.icon,
                                                 title = item.title,
                                                 isChecked = notificationsEnabled,
-                                                onCheckedChange = { notificationsEnabled = it }
+                                                onCheckedChange = { enabled ->
+                                                        notificationsEnabled = enabled
+                                                        scope.launch {
+                                                                com.ilkinbayramov.ninjatalk.utils
+                                                                        .TokenManager
+                                                                        .setNotificationsEnabled(
+                                                                                enabled
+                                                                        )
+                                                        }
+                                                }
                                         )
                                 } else {
                                         SettingsItem(

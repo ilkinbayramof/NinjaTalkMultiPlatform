@@ -49,4 +49,19 @@ object TokenManager {
     fun setUserId(userId: String) {
         cachedUserId = userId
     }
+
+    // Notification settings
+    private var cachedNotificationsEnabled: Boolean? = null
+
+    suspend fun getNotificationsEnabled(): Boolean {
+        if (cachedNotificationsEnabled == null) {
+            cachedNotificationsEnabled = DataTokenManager().getNotificationsEnabled()
+        }
+        return cachedNotificationsEnabled ?: true // Default to enabled
+    }
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        cachedNotificationsEnabled = enabled
+        DataTokenManager().saveNotificationsEnabled(enabled)
+    }
 }
