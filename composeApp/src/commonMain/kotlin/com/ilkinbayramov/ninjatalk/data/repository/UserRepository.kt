@@ -83,4 +83,33 @@ class UserRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun changePassword(currentPassword: String, newPassword: String): Result<Unit> {
+        return try {
+            val token =
+                    com.ilkinbayramov.ninjatalk.utils.TokenManager.getToken()
+                            ?: return Result.failure(Exception("Not authenticated"))
+
+            val response =
+                    client.put("$baseUrl/api/users/password") {
+                        header("Authorization", "Bearer $token")
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                                mapOf(
+                                        "currentPassword" to currentPassword,
+                                        "newPassword" to newPassword
+                                )
+                        )
+                    }
+
+            if (response.status == HttpStatusCode.OK) {
+                Result.success(Unit)
+            } else {
+                val errorBody: Map<String, String> = response.body()
+                Result.failure(Exception(errorBody["error"] ?: "Failed to change password"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
