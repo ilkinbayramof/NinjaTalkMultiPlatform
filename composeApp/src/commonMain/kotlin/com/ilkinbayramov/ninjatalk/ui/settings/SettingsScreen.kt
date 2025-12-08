@@ -229,9 +229,72 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Hesabı Sil Button
+                        // Hesabı Sil Button with confirmation
+                        var showDeleteDialog by remember { mutableStateOf(false) }
+                        val userRepository = remember {
+                                com.ilkinbayramov.ninjatalk.data.repository.UserRepository()
+                        }
+
+                        if (showDeleteDialog) {
+                                AlertDialog(
+                                        onDismissRequest = { showDeleteDialog = false },
+                                        title = { Text("Hesabı Sil", color = Color.White) },
+                                        text = {
+                                                Text(
+                                                        "Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+                                                        color = Color.White
+                                                )
+                                        },
+                                        confirmButton = {
+                                                TextButton(
+                                                        onClick = {
+                                                                showDeleteDialog = false
+                                                                scope.launch {
+                                                                        userRepository
+                                                                                .deleteAccount()
+                                                                                .onSuccess {
+                                                                                        // Clear
+                                                                                        // token and
+                                                                                        // logout
+                                                                                        com.ilkinbayramov
+                                                                                                .ninjatalk
+                                                                                                .utils
+                                                                                                .TokenManager
+                                                                                                .clearToken()
+                                                                                        onLogout()
+                                                                                }
+                                                                                .onFailure { error
+                                                                                        ->
+                                                                                        // Handle
+                                                                                        // error
+                                                                                        // silently
+                                                                                        // or show
+                                                                                        // message
+                                                                                        println(
+                                                                                                "Delete account error: ${error.message}"
+                                                                                        )
+                                                                                }
+                                                                }
+                                                        }
+                                                ) {
+                                                        Text(
+                                                                "Sil",
+                                                                color = Color.Red,
+                                                                fontWeight = FontWeight.Bold
+                                                        )
+                                                }
+                                        },
+                                        dismissButton = {
+                                                TextButton(onClick = { showDeleteDialog = false }) {
+                                                        Text("İptal", color = Color.White)
+                                                }
+                                        },
+                                        containerColor = NinjaSurface
+                                )
+                        }
+
                         TextButton(
-                                onClick = { /* TODO: Delete account */},
+                                onClick = { showDeleteDialog = true },
                                 modifier = Modifier.fillMaxWidth()
                         ) { Text("Hesabı Sil", color = Color.Red, fontWeight = FontWeight.Medium) }
                 }

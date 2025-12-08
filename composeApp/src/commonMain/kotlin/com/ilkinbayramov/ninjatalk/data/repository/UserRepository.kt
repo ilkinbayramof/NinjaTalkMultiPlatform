@@ -112,4 +112,26 @@ class UserRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun deleteAccount(): Result<Unit> {
+        return try {
+            val token =
+                    com.ilkinbayramov.ninjatalk.utils.TokenManager.getToken()
+                            ?: return Result.failure(Exception("Not authenticated"))
+
+            val response =
+                    client.delete("$baseUrl/api/users/me") {
+                        header("Authorization", "Bearer $token")
+                    }
+
+            if (response.status == HttpStatusCode.OK) {
+                Result.success(Unit)
+            } else {
+                val errorBody: Map<String, String> = response.body()
+                Result.failure(Exception(errorBody["error"] ?: "Failed to delete account"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
