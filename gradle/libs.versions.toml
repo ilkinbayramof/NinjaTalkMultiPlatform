@@ -17,6 +17,7 @@ kotlinx-serialization = "1.7.3"
 kotlinx-datetime = "0.6.1"
 hilt = "2.52"
 hilt-navigation-compose = "1.2.0"
+coil = "3.0.0"
 
 
 [libraries]
@@ -48,6 +49,10 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
+
+# Coil (Image Loading)
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 
 
 [plugins]
