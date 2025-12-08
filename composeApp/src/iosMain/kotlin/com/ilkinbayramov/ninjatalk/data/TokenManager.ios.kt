@@ -16,4 +16,12 @@ actual class TokenManager {
     actual suspend fun clearToken() {
         userDefaults.removeObjectForKey("auth_token")
     }
+
+    actual suspend fun saveNotificationsEnabled(enabled: Boolean) {
+        userDefaults.setBool(enabled, forKey = "notifications_enabled")
+    }
+
+    actual suspend fun getNotificationsEnabled(): Boolean {
+        return userDefaults.boolForKey("notifications_enabled") ?: true // Default to enabled
+    }
 }
