@@ -30,7 +30,7 @@ sealed class MainTab(val route: String, val label: String, val icon: ImageVector
 }
 
 @Composable
-fun MainRoute() {
+fun MainRoute(onLogout: () -> Unit = {}) {
     var selectedTab by remember { mutableStateOf<MainTab>(MainTab.Shuffle) }
     var currentConversationId by remember { mutableStateOf<String?>(null) }
     var currentConversationName by remember { mutableStateOf("Anonim Sohbet") }
@@ -109,7 +109,7 @@ fun MainRoute() {
                                         }
                                 )
                         MainTab.Premium -> PlaceholderTab("Premium")
-                        MainTab.Profile -> SettingsScreen()
+                        MainTab.Profile -> SettingsScreen(onLogout = onLogout)
                     }
                 }
             }
