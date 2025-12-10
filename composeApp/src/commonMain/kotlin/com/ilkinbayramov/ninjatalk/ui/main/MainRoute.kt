@@ -40,6 +40,7 @@ fun MainRoute(onLogout: () -> Unit = {}) {
 
     Scaffold(
             containerColor = NinjaBackground,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0), // Remove system bar padding
             bottomBar = {
                 // Hide bottom bar when in inbox
                 if (currentConversationId == null) {
