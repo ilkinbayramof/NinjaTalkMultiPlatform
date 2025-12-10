@@ -18,10 +18,24 @@ import kotlinx.coroutines.launch
 @Composable
 fun App() {
     MaterialTheme {
-        var currentScreen by remember { mutableStateOf("register") }
+        var currentScreen by remember { mutableStateOf<String?>(null) } // null = checking
         val scope = rememberCoroutineScope()
 
         val authRepository = remember { AuthRepository() }
+
+        // Check for existing token on app start
+        LaunchedEffect(Unit) {
+            val token = com.ilkinbayramov.ninjatalk.utils.TokenManager.getToken()
+            currentScreen = if (token != null) "main" else "register"
+        }
+
+        // Show loading while checking token
+        if (currentScreen == null) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Loading...", style = MaterialTheme.typography.bodyLarge)
+            }
+            return@MaterialTheme
+        }
 
         when (currentScreen) {
             "register" -> {

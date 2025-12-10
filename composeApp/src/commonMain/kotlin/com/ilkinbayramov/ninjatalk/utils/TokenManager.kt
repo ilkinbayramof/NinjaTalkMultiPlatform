@@ -24,9 +24,13 @@ object TokenManager {
         cachedToken = null
         cachedUserId = null
         DataTokenManager().clearToken()
+        DataTokenManager().clearUserId()
     }
 
-    fun getUserId(): String? {
+    suspend fun getUserId(): String? {
+        if (cachedUserId == null) {
+            cachedUserId = DataTokenManager().getUserId()
+        }
         return cachedUserId
     }
 
@@ -46,8 +50,9 @@ object TokenManager {
         }
     }
 
-    fun setUserId(userId: String) {
+    suspend fun setUserId(userId: String) {
         cachedUserId = userId
+        DataTokenManager().saveUserId(userId)
     }
 
     // Notification settings

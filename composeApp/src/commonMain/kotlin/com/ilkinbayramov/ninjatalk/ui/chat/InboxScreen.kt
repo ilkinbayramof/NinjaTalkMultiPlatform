@@ -44,7 +44,11 @@ fun InboxScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     var showBlockDialog by remember { mutableStateOf(false) }
     var isUserBlocked by remember { mutableStateOf(false) }
+    var currentUserId by remember { mutableStateOf<String?>(null) }
     val userRepository = remember { com.ilkinbayramov.ninjatalk.data.repository.UserRepository() }
+
+    // Load userId on screen load
+    LaunchedEffect(Unit) { currentUserId = TokenManager.getUserId() }
 
     // Check if user is blocked on screen load
     LaunchedEffect(otherUserId) {
@@ -263,12 +267,13 @@ fun InboxScreen(
             LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+                    contentPadding = PaddingValues(vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(state.messages) { message ->
                     MessageBubble(
                             message = message,
-                            isOwnMessage = message.senderId == TokenManager.getUserId()
+                            isOwnMessage = message.senderId == currentUserId
                     )
                 }
             }

@@ -109,7 +109,9 @@ class RegisterViewModel(private val authRepository: AuthRepository) :
                     )
                     .onSuccess { response ->
                         tokenManager.saveToken(response.token)
-                        com.ilkinbayramov.ninjatalk.utils.TokenManager.setUserId(response.userId)
+                        com.ilkinbayramov.ninjatalk.utils.TokenManager.setUserId(
+                                response.userId
+                        ) // Already suspend
                         setState { copy(isLoading = false) }
                         sendEffect { RegisterUiEffect.NavigateToHome }
                     }

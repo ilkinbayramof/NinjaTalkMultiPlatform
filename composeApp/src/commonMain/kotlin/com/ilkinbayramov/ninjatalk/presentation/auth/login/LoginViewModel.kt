@@ -47,7 +47,9 @@ class LoginViewModel(private val authRepository: AuthRepository) :
                     .login(email = state.email, password = state.password)
                     .onSuccess { response ->
                         tokenManager.saveToken(response.token)
-                        com.ilkinbayramov.ninjatalk.utils.TokenManager.setUserId(response.userId)
+                        com.ilkinbayramov.ninjatalk.utils.TokenManager.setUserId(
+                                response.userId
+                        ) // Already suspend
                         setState { copy(isLoading = false) }
                         sendEffect { LoginUiEffect.NavigateToHome }
                     }

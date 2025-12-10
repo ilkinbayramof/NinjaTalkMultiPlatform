@@ -90,11 +90,13 @@ class InboxViewModel(
                 if (content.isBlank()) return
 
                 viewModelScope.launch {
+                        println("DEBUG: sendMessage called with content: $content")
                         _uiState.value = _uiState.value.copy(isSending = true)
 
                         val token =
                                 TokenManager.getToken()
                                         ?: run {
+                                                println("ERROR: No token found in sendMessage")
                                                 _uiState.value =
                                                         _uiState.value.copy(
                                                                 isSending = false,
@@ -103,10 +105,14 @@ class InboxViewModel(
                                                 return@launch
                                         }
 
+                        println("DEBUG: Sending message to conversation: $conversationId")
                         val request = SendMessageRequest(conversationId, content)
                         chatRepository
                                 .sendMessage(request, token)
                                 .onSuccess { newMessage ->
+                                        println(
+                                                "DEBUG: Message sent successfully, ID: ${newMessage.id}"
+                                        )
                                         _uiState.value =
                                                 _uiState.value.copy(
                                                         messages =
@@ -117,6 +123,8 @@ class InboxViewModel(
                                                 )
                                 }
                                 .onFailure { error ->
+                                        println("ERROR: Failed to send message: ${error.message}")
+                                        error.printStackTrace()
                                         _uiState.value =
                                                 _uiState.value.copy(
                                                         isSending = false,
