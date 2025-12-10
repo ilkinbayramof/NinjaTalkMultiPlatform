@@ -24,81 +24,109 @@ class InboxViewModel(
         private val chatRepository: ChatRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(InboxUiState())
-    val uiState: StateFlow<InboxUiState> = _uiState.asStateFlow()
+        private val _uiState = MutableStateFlow(InboxUiState())
+        val uiState: StateFlow<InboxUiState> = _uiState.asStateFlow()
 
-    init {
-        loadMessages()
-    }
+        private var pollingJob: kotlinx.coroutines.Job? = null
 
-    fun loadMessages() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-
-            val token =
-                    TokenManager.getToken()
-                            ?: run {
-                                _uiState.value =
-                                        _uiState.value.copy(
-                                                isLoading = false,
-                                                error = "Not authenticated"
-                                        )
-                                return@launch
-                            }
-
-            chatRepository
-                    .getMessages(conversationId, token)
-                    .onSuccess { messages ->
-                        _uiState.value =
-                                _uiState.value.copy(
-                                        messages = messages,
-                                        isLoading = false,
-                                        error = null
-                                )
-                    }
-                    .onFailure { error ->
-                        _uiState.value =
-                                _uiState.value.copy(isLoading = false, error = error.message)
-                    }
+        init {
+                loadMessages()
+                startPolling()
         }
-    }
 
-    fun sendMessage(content: String) {
-        if (content.isBlank()) return
-
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isSending = true)
-
-            val token =
-                    TokenManager.getToken()
-                            ?: run {
-                                _uiState.value =
-                                        _uiState.value.copy(
-                                                isSending = false,
-                                                error = "Not authenticated"
-                                        )
-                                return@launch
-                            }
-
-            val request = SendMessageRequest(conversationId, content)
-            chatRepository
-                    .sendMessage(request, token)
-                    .onSuccess { newMessage ->
-                        _uiState.value =
-                                _uiState.value.copy(
-                                        messages = _uiState.value.messages + newMessage,
-                                        isSending = false,
-                                        error = null
-                                )
-                    }
-                    .onFailure { error ->
-                        _uiState.value =
-                                _uiState.value.copy(isSending = false, error = error.message)
-                    }
+        private fun startPolling() {
+                pollingJob =
+                        viewModelScope.launch {
+                                while (true) {
+                                        kotlinx.coroutines.delay(3000) // Check every 3 seconds
+                                        loadMessages(showLoading = false) // Silent refresh
+                                }
+                        }
         }
-    }
 
-    fun setAnonymousName(name: String) {
-        _uiState.value = _uiState.value.copy(anonymousName = name)
-    }
+        override fun onCleared() {
+                super.onCleared()
+                pollingJob?.cancel()
+        }
+
+        fun loadMessages(showLoading: Boolean = true) {
+                viewModelScope.launch {
+                        if (showLoading) {
+                                _uiState.value = _uiState.value.copy(isLoading = true)
+                        }
+
+                        val token =
+                                TokenManager.getToken()
+                                        ?: run {
+                                                _uiState.value =
+                                                        _uiState.value.copy(
+                                                                isLoading = false,
+                                                                error = "Not authenticated"
+                                                        )
+                                                return@launch
+                                        }
+
+                        chatRepository
+                                .getMessages(conversationId, token)
+                                .onSuccess { messages ->
+                                        _uiState.value =
+                                                _uiState.value.copy(
+                                                        messages = messages,
+                                                        isLoading = false,
+                                                        error = null
+                                                )
+                                }
+                                .onFailure { error ->
+                                        _uiState.value =
+                                                _uiState.value.copy(
+                                                        isLoading = false,
+                                                        error = error.message
+                                                )
+                                }
+                }
+        }
+
+        fun sendMessage(content: String) {
+                if (content.isBlank()) return
+
+                viewModelScope.launch {
+                        _uiState.value = _uiState.value.copy(isSending = true)
+
+                        val token =
+                                TokenManager.getToken()
+                                        ?: run {
+                                                _uiState.value =
+                                                        _uiState.value.copy(
+                                                                isSending = false,
+                                                                error = "Not authenticated"
+                                                        )
+                                                return@launch
+                                        }
+
+                        val request = SendMessageRequest(conversationId, content)
+                        chatRepository
+                                .sendMessage(request, token)
+                                .onSuccess { newMessage ->
+                                        _uiState.value =
+                                                _uiState.value.copy(
+                                                        messages =
+                                                                _uiState.value.messages +
+                                                                        newMessage,
+                                                        isSending = false,
+                                                        error = null
+                                                )
+                                }
+                                .onFailure { error ->
+                                        _uiState.value =
+                                                _uiState.value.copy(
+                                                        isSending = false,
+                                                        error = error.message
+                                                )
+                                }
+                }
+        }
+
+        fun setAnonymousName(name: String) {
+                _uiState.value = _uiState.value.copy(anonymousName = name)
+        }
 }
