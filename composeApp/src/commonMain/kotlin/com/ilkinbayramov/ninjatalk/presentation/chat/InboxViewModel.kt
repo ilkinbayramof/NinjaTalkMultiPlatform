@@ -134,6 +134,44 @@ class InboxViewModel(
                 }
         }
 
+        fun clearMessages() {
+                viewModelScope.launch {
+                        println("DEBUG: clearMessages called for conversation: $conversationId")
+                        _uiState.value = _uiState.value.copy(isLoading = true)
+
+                        val token =
+                                TokenManager.getToken()
+                                        ?: run {
+                                                println("ERROR: No token found in clearMessages")
+                                                _uiState.value =
+                                                        _uiState.value.copy(
+                                                                isLoading = false,
+                                                                error = "Not authenticated"
+                                                        )
+                                                return@launch
+                                        }
+
+                        chatRepository
+                                .clearMessages(conversationId, token)
+                                .onSuccess {
+                                        println("DEBUG: Messages cleared successfully")
+                                        _uiState.value =
+                                                _uiState.value.copy(
+                                                        messages = emptyList(),
+                                                        isLoading = false
+                                                )
+                                }
+                                .onFailure { error ->
+                                        println("ERROR: Failed to clear messages: ${error.message}")
+                                        _uiState.value =
+                                                _uiState.value.copy(
+                                                        isLoading = false,
+                                                        error = error.message
+                                                )
+                                }
+                }
+        }
+
         fun setAnonymousName(name: String) {
                 _uiState.value = _uiState.value.copy(anonymousName = name)
         }

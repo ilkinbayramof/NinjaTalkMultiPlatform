@@ -116,13 +116,9 @@ fun InboxScreen(
                     showBottomSheet = false
                     showBlockDialog = true
                 },
-                onReport = {
-                    // TODO: Implement report
-                    showBottomSheet = false
-                },
                 onClearChat = {
-                    // TODO: Implement clear chat
                     showBottomSheet = false
+                    viewModel.clearMessages()
                 }
         )
     }
@@ -332,7 +328,6 @@ private fun MessageBubble(message: Message, isOwnMessage: Boolean) {
 private fun ChatOptionsBottomSheet(
         onDismiss: () -> Unit,
         onBlock: () -> Unit,
-        onReport: () -> Unit,
         onClearChat: () -> Unit
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = NinjaSurface) {
@@ -340,11 +335,6 @@ private fun ChatOptionsBottomSheet(
             // Block option
             TextButton(onClick = onBlock, modifier = Modifier.fillMaxWidth()) {
                 Text("Engelle", color = Color.Red, fontSize = 16.sp)
-            }
-
-            // Report option
-            TextButton(onClick = onReport, modifier = Modifier.fillMaxWidth()) {
-                Text("Şikayet Et", color = Color.White, fontSize = 16.sp)
             }
 
             // Clear chat option
