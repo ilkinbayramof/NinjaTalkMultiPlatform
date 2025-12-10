@@ -29,6 +29,7 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
         var searchQuery by remember { mutableStateOf("") }
         var showProfileEdit by remember { mutableStateOf(false) }
         var showPasswordChange by remember { mutableStateOf(false) }
+        var showBlockedUsers by remember { mutableStateOf(false) }
 
         if (showProfileEdit) {
                 com.ilkinbayramov.ninjatalk.ui.settings.profile.ProfileEditScreen(
@@ -40,6 +41,13 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
         if (showPasswordChange) {
                 com.ilkinbayramov.ninjatalk.ui.settings.password.ChangePasswordScreen(
                         onBackClick = { showPasswordChange = false }
+                )
+                return
+        }
+
+        if (showBlockedUsers) {
+                com.ilkinbayramov.ninjatalk.ui.settings.blocked.BlockedUsersScreen(
+                        onBackClick = { showBlockedUsers = false }
                 )
                 return
         }
@@ -73,11 +81,6 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                                 "Gizlilik ve Güvenlik",
                                 listOf(
                                         SettingItemData(
-                                                "Profil Gizliliği",
-                                                null,
-                                                Icons.Default.Shield
-                                        ),
-                                        SettingItemData(
                                                 "Engellenen Kullanıcılar",
                                                 null,
                                                 Icons.Default.Block
@@ -88,7 +91,6 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                                 "Uygulama",
                                 listOf(
                                         SettingItemData("Dil", null, Icons.Default.Language),
-                                        SettingItemData("Tema", null, Icons.Default.Palette)
                                 )
                         )
                 )
@@ -208,6 +210,8 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                                                                         showProfileEdit = true
                                                                 "Şifre Değiştir" ->
                                                                         showPasswordChange = true
+                                                                "Engellenen Kullanıcılar" ->
+                                                                        showBlockedUsers = true
                                                         }
                                                 }
                                         )

@@ -34,6 +34,7 @@ fun MainRoute(onLogout: () -> Unit = {}) {
     var selectedTab by remember { mutableStateOf<MainTab>(MainTab.Shuffle) }
     var currentConversationId by remember { mutableStateOf<String?>(null) }
     var currentConversationName by remember { mutableStateOf("Anonim Sohbet") }
+    var currentOtherUserId by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val chatRepository = remember { ChatRepository() }
 
@@ -51,8 +52,12 @@ fun MainRoute(onLogout: () -> Unit = {}) {
                 currentConversationId != null -> {
                     InboxScreen(
                             conversationId = currentConversationId!!,
+                            otherUserId = currentOtherUserId!!,
                             conversationName = currentConversationName,
-                            onBackClick = { currentConversationId = null }
+                            onBackClick = {
+                                currentConversationId = null
+                                currentOtherUserId = null
+                            }
                     )
                 }
                 else -> {
@@ -60,7 +65,8 @@ fun MainRoute(onLogout: () -> Unit = {}) {
                         MainTab.Chat ->
                                 ChatListScreen(
                                         onConversationClick = { conversationId ->
-                                            // Get conversation from list to get name
+                                            // Get conversation from list to get name and
+                                            // otherUserId
                                             scope.launch {
                                                 val token = TokenManager.getToken()
                                                 if (token != null) {
@@ -74,6 +80,8 @@ fun MainRoute(onLogout: () -> Unit = {}) {
                                                                         conversation
                                                                                 ?.otherUserAnonymousName
                                                                                 ?: "Anonim Sohbet"
+                                                                currentOtherUserId =
+                                                                        conversation?.otherUserId
                                                                 currentConversationId =
                                                                         conversationId
                                                             }
@@ -96,6 +104,7 @@ fun MainRoute(onLogout: () -> Unit = {}) {
                                                             .createConversation(user.id, token)
                                                             .onSuccess { conversationId ->
                                                                 currentConversationName = realName
+                                                                currentOtherUserId = user.id
                                                                 currentConversationId =
                                                                         conversationId
                                                             }

@@ -32,6 +32,7 @@ import kotlinx.datetime.toLocalDateTime
 @Composable
 fun InboxScreen(
         conversationId: String,
+        otherUserId: String,
         conversationName: String = "Anonim Sohbet",
         onBackClick: () -> Unit
 ) {
@@ -41,6 +42,61 @@ fun InboxScreen(
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showBlockDialog by remember { mutableStateOf(false) }
+    var isUserBlocked by remember { mutableStateOf(false) }
+    val userRepository = remember { com.ilkinbayramov.ninjatalk.data.repository.UserRepository() }
+
+    // Check if user is blocked on screen load
+    LaunchedEffect(otherUserId) {
+        userRepository.getBlockedUsers().onSuccess { blockedUsers ->
+            isUserBlocked = blockedUsers.any { it.id == otherUserId }
+            println("DEBUG: Is user $otherUserId blocked? $isUserBlocked")
+        }
+    }
+
+    // Block confirmation dialog
+    if (showBlockDialog) {
+        AlertDialog(
+                onDismissRequest = { showBlockDialog = false },
+                title = { Text("Kullanıcıyı Engelle", color = Color.White) },
+                text = {
+                    Text(
+                            "Bu kullanıcıyı engellemek istediğinizden emin misiniz? " +
+                                    "Engelledikten sonra bu kullanıcıdan mesaj alamayacaksınız.",
+                            color = Color.White
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                            onClick = {
+                                scope.launch {
+                                    println("DEBUG: Block button clicked for user: $otherUserId")
+                                    userRepository
+                                            .blockUser(otherUserId)
+                                            .onSuccess {
+                                                println(
+                                                        "DEBUG: Block successful for user: $otherUserId"
+                                                )
+                                                isUserBlocked = true
+                                                showBlockDialog = false
+                                            }
+                                            .onFailure { error ->
+                                                println("ERROR: Block failed: ${error.message}")
+                                                error.printStackTrace()
+                                                showBlockDialog = false
+                                            }
+                                }
+                            }
+                    ) { Text("Engelle", color = Color.Red, fontWeight = FontWeight.Bold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showBlockDialog = false }) {
+                        Text("İptal", color = Color.White)
+                    }
+                },
+                containerColor = NinjaSurface
+        )
+    }
 
     // Auto-scroll to bottom when new messages arrive
     LaunchedEffect(state.messages.size) {
@@ -53,8 +109,8 @@ fun InboxScreen(
         ChatOptionsBottomSheet(
                 onDismiss = { showBottomSheet = false },
                 onBlock = {
-                    // TODO: Implement block
                     showBottomSheet = false
+                    showBlockDialog = true
                 },
                 onReport = {
                     // TODO: Implement report
@@ -101,60 +157,98 @@ fun InboxScreen(
             },
             bottomBar = {
                 Surface(color = NinjaSurface, shadowElevation = 8.dp) {
-                    Row(
-                            modifier =
-                                    Modifier.fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedTextField(
-                                value = messageText,
-                                onValueChange = { messageText = it },
-                                placeholder = {
-                                    Text("Mesajınızı yazın...", color = NinjaTextSecondary)
-                                },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(24.dp),
-                                colors =
-                                        OutlinedTextFieldDefaults.colors(
-                                                focusedContainerColor = NinjaBackground,
-                                                unfocusedContainerColor = NinjaBackground,
-                                                cursorColor = NinjaPrimary,
-                                                focusedBorderColor = NinjaPrimary,
-                                                unfocusedBorderColor = Color.Transparent,
-                                                focusedTextColor = Color.White,
-                                                unfocusedTextColor = Color.White
-                                        )
-                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        // Emoji button
-                        IconButton(onClick = { /* TODO: Show emoji picker */}) {
-                            Icon(
-                                    imageVector = Icons.Default.EmojiEmotions,
-                                    contentDescription = "Emoji",
-                                    tint = NinjaTextSecondary
-                            )
-                        }
-
-                        // Send button
-                        IconButton(
-                                onClick = {
-                                    if (messageText.isNotBlank()) {
-                                        viewModel.sendMessage(messageText)
-                                        messageText = ""
-                                    }
-                                },
-                                enabled = messageText.isNotBlank() && !state.isSending
+                    if (isUserBlocked) {
+                        // Show unblock button when user is blocked
+                        Row(
+                                modifier =
+                                        Modifier.fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Send,
-                                    contentDescription = "Send",
-                                    tint =
-                                            if (messageText.isNotBlank()) NinjaPrimary
-                                            else NinjaTextSecondary
+                            Button(
+                                    onClick = {
+                                        scope.launch {
+                                            println(
+                                                    "DEBUG: Unblock button clicked for user: $otherUserId"
+                                            )
+                                            userRepository
+                                                    .unblockUser(otherUserId)
+                                                    .onSuccess {
+                                                        println("DEBUG: Unblock successful")
+                                                        isUserBlocked = false
+                                                    }
+                                                    .onFailure { error ->
+                                                        println(
+                                                                "ERROR: Unblock failed: ${error.message}"
+                                                        )
+                                                    }
+                                        }
+                                    },
+                                    colors =
+                                            ButtonDefaults.buttonColors(
+                                                    containerColor = NinjaPrimary
+                                            ),
+                                    shape = RoundedCornerShape(24.dp)
+                            ) { Text("Engeli Kaldır", color = Color.White) }
+                        }
+                    } else {
+                        // Normal message input
+                        Row(
+                                modifier =
+                                        Modifier.fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                    value = messageText,
+                                    onValueChange = { messageText = it },
+                                    placeholder = {
+                                        Text("Mesajınızı yazın...", color = NinjaTextSecondary)
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(24.dp),
+                                    colors =
+                                            OutlinedTextFieldDefaults.colors(
+                                                    focusedContainerColor = NinjaBackground,
+                                                    unfocusedContainerColor = NinjaBackground,
+                                                    cursorColor = NinjaPrimary,
+                                                    focusedBorderColor = NinjaPrimary,
+                                                    unfocusedBorderColor = Color.Transparent,
+                                                    focusedTextColor = Color.White,
+                                                    unfocusedTextColor = Color.White
+                                            )
                             )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            // Emoji button
+                            IconButton(onClick = { /* TODO: Show emoji picker */}) {
+                                Icon(
+                                        imageVector = Icons.Default.EmojiEmotions,
+                                        contentDescription = "Emoji",
+                                        tint = NinjaTextSecondary
+                                )
+                            }
+
+                            // Send button
+                            IconButton(
+                                    onClick = {
+                                        if (messageText.isNotBlank()) {
+                                            viewModel.sendMessage(messageText)
+                                            messageText = ""
+                                        }
+                                    },
+                                    enabled = messageText.isNotBlank() && !state.isSending
+                            ) {
+                                Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.Send,
+                                        contentDescription = "Send",
+                                        tint =
+                                                if (messageText.isNotBlank()) NinjaPrimary
+                                                else NinjaTextSecondary
+                                )
+                            }
                         }
                     }
                 }
