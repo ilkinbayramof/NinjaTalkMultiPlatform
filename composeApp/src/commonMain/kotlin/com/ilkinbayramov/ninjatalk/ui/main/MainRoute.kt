@@ -12,7 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.ilkinbayramov.ninjatalk.data.repository.ChatRepository
 import com.ilkinbayramov.ninjatalk.ui.chat.ChatListScreen
 import com.ilkinbayramov.ninjatalk.ui.chat.InboxScreen
@@ -35,8 +37,22 @@ fun MainRoute(onLogout: () -> Unit = {}) {
     var currentConversationId by remember { mutableStateOf<String?>(null) }
     var currentConversationName by remember { mutableStateOf("Anonim Sohbet") }
     var currentOtherUserId by remember { mutableStateOf<String?>(null) }
+    var unreadCount by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val chatRepository = remember { ChatRepository() }
+
+    // Check for unread messages periodically
+    LaunchedEffect(Unit) {
+        while (true) {
+            val token = TokenManager.getToken()
+            if (token != null) {
+                chatRepository.getConversations(token).onSuccess { conversations ->
+                    unreadCount = conversations.sumOf { it.unreadCount }
+                }
+            }
+            kotlinx.coroutines.delay(5000) // Check every 5 seconds
+        }
+    }
 
     Scaffold(
             containerColor = NinjaBackground,
@@ -44,7 +60,11 @@ fun MainRoute(onLogout: () -> Unit = {}) {
             bottomBar = {
                 // Hide bottom bar when in inbox
                 if (currentConversationId == null) {
-                    BottomBar(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
+                    BottomBar(
+                            selectedTab = selectedTab,
+                            onTabSelected = { selectedTab = it },
+                            unreadCount = unreadCount
+                    )
                 }
             }
     ) { padding ->
@@ -128,7 +148,11 @@ fun MainRoute(onLogout: () -> Unit = {}) {
 }
 
 @Composable
-private fun BottomBar(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit) {
+private fun BottomBar(
+        selectedTab: MainTab,
+        onTabSelected: (MainTab) -> Unit,
+        unreadCount: Int = 0
+) {
     Box(
             modifier =
                     Modifier.fillMaxWidth()
@@ -144,7 +168,8 @@ private fun BottomBar(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit) {
             BottomItem(
                     tab = MainTab.Chat,
                     isSelected = selectedTab == MainTab.Chat,
-                    onClick = { onTabSelected(MainTab.Chat) }
+                    onClick = { onTabSelected(MainTab.Chat) },
+                    badgeCount = unreadCount
             )
 
             BottomItem(
@@ -169,17 +194,43 @@ private fun BottomBar(selectedTab: MainTab, onTabSelected: (MainTab) -> Unit) {
 }
 
 @Composable
-private fun BottomItem(tab: MainTab, isSelected: Boolean, onClick: () -> Unit) {
+private fun BottomItem(
+        tab: MainTab,
+        isSelected: Boolean,
+        onClick: () -> Unit,
+        badgeCount: Int = 0
+) {
     Column(
             modifier = Modifier.width(70.dp).clickable(onClick = onClick),
             horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-                imageVector = tab.icon,
-                contentDescription = tab.label,
-                tint = if (isSelected) Color.White else Color(0xFF7A7A7A),
-                modifier = Modifier.size(22.dp)
-        )
+        Box {
+            Icon(
+                    imageVector = tab.icon,
+                    contentDescription = tab.label,
+                    tint = if (isSelected) Color.White else Color(0xFF7A7A7A),
+                    modifier = Modifier.size(22.dp)
+            )
+
+            // Red badge for unread count
+            if (badgeCount > 0) {
+                Box(
+                        modifier =
+                                Modifier.align(Alignment.TopEnd)
+                                        .offset(x = 6.dp, y = (-4).dp)
+                                        .size(16.dp)
+                                        .background(Color.Red, shape = RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                            text = if (badgeCount > 9) "9+" else badgeCount.toString(),
+                            color = Color.White,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(2.dp))
 
