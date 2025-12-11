@@ -15,6 +15,19 @@ actual class TokenManager {
 
     actual suspend fun clearToken() {
         userDefaults.removeObjectForKey("auth_token")
+        userDefaults.removeObjectForKey("user_id") // Also clear userId when clearing token
+    }
+
+    actual suspend fun saveUserId(userId: String) {
+        userDefaults.setObject(userId, forKey = "user_id")
+    }
+
+    actual suspend fun getUserId(): String? {
+        return userDefaults.stringForKey("user_id")
+    }
+
+    actual suspend fun clearUserId() {
+        userDefaults.removeObjectForKey("user_id")
     }
 
     actual suspend fun saveNotificationsEnabled(enabled: Boolean) {

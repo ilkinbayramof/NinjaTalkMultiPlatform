@@ -18,38 +18,57 @@ data class ChatListUiState(
 
 class ChatListViewModel(private val chatRepository: ChatRepository) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ChatListUiState())
-    val uiState: StateFlow<ChatListUiState> = _uiState.asStateFlow()
+        private val _uiState = MutableStateFlow(ChatListUiState())
+        val uiState: StateFlow<ChatListUiState> = _uiState.asStateFlow()
 
-    fun loadConversations() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+        fun loadConversations() {
+                viewModelScope.launch {
+                        _uiState.value = _uiState.value.copy(isLoading = true)
 
-            val token =
-                    TokenManager.getToken()
-                            ?: run {
-                                _uiState.value =
-                                        _uiState.value.copy(
-                                                isLoading = false,
-                                                error = "Not authenticated"
-                                        )
-                                return@launch
-                            }
+                        val token =
+                                TokenManager.getToken()
+                                        ?: run {
+                                                _uiState.value =
+                                                        _uiState.value.copy(
+                                                                isLoading = false,
+                                                                error = "Not authenticated"
+                                                        )
+                                                return@launch
+                                        }
 
-            chatRepository
-                    .getConversations(token)
-                    .onSuccess { conversations ->
-                        _uiState.value =
-                                _uiState.value.copy(
-                                        conversations = conversations,
-                                        isLoading = false,
-                                        error = null
-                                )
-                    }
-                    .onFailure { error ->
-                        _uiState.value =
-                                _uiState.value.copy(isLoading = false, error = error.message)
-                    }
+                        chatRepository
+                                .getConversations(token)
+                                .onSuccess { conversations ->
+                                        _uiState.value =
+                                                _uiState.value.copy(
+                                                        conversations = conversations,
+                                                        isLoading = false,
+                                                        error = null
+                                                )
+                                }
+                                .onFailure { error ->
+                                        _uiState.value =
+                                                _uiState.value.copy(
+                                                        isLoading = false,
+                                                        error = error.message
+                                                )
+                                }
+                }
         }
-    }
+
+        fun deleteConversation(conversationId: String) {
+                viewModelScope.launch {
+                        val token = TokenManager.getToken() ?: return@launch
+
+                        chatRepository
+                                .deleteConversation(conversationId, token)
+                                .onSuccess {
+                                        // Reload conversations after deletion
+                                        loadConversations()
+                                }
+                                .onFailure { error ->
+                                        _uiState.value = _uiState.value.copy(error = error.message)
+                                }
+                }
+        }
 }

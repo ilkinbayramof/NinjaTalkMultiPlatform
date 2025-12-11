@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,11 +24,15 @@ import com.ilkinbayramov.ninjatalk.data.dto.Conversation
 import com.ilkinbayramov.ninjatalk.data.repository.ChatRepository
 import com.ilkinbayramov.ninjatalk.presentation.chat.ChatListViewModel
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatListScreen(onConversationClick: (String) -> Unit) {
     val viewModel = remember { ChatListViewModel(ChatRepository()) }
     val state by viewModel.uiState.collectAsState()
+    var conversationToDelete by remember { mutableStateOf<Conversation?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) { viewModel.loadConversations() }
 
@@ -60,15 +65,92 @@ fun ChatListScreen(onConversationClick: (String) -> Unit) {
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxSize()
                 ) {
-                    items(state.conversations) { conversation ->
-                        ConversationItem(
-                                conversation = conversation,
-                                onClick = { onConversationClick(conversation.id) }
-                        )
+                    items(state.conversations, key = { it.id }) { conversation ->
+                        val dismissState =
+                                rememberSwipeToDismissBoxState(
+                                        confirmValueChange = {
+                                            if (it == SwipeToDismissBoxValue.EndToStart) {
+                                                conversationToDelete = conversation
+                                                showDeleteDialog = true
+                                                false // Don't confirm, we'll handle it manually
+                                            } else {
+                                                false
+                                            }
+                                        }
+                                )
+
+                        // Reset swipe state when dialog closes without deletion
+                        LaunchedEffect(showDeleteDialog, conversationToDelete) {
+                            if (!showDeleteDialog && conversationToDelete == null) {
+                                dismissState.reset()
+                            }
+                        }
+
+                        SwipeToDismissBox(
+                                state = dismissState,
+                                backgroundContent = {
+                                    Box(
+                                            modifier =
+                                                    Modifier.fillMaxSize()
+                                                            .background(
+                                                                    Color.Red,
+                                                                    RoundedCornerShape(16.dp)
+                                                            )
+                                                            .padding(horizontal = 20.dp),
+                                            contentAlignment = Alignment.CenterEnd
+                                    ) {
+                                        Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = "Sil",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(32.dp)
+                                        )
+                                    }
+                                },
+                                enableDismissFromStartToEnd = false
+                        ) {
+                            ConversationItem(
+                                    conversation = conversation,
+                                    onClick = { onConversationClick(conversation.id) }
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+
+    // Delete confirmation dialog
+    if (showDeleteDialog && conversationToDelete != null) {
+        AlertDialog(
+                onDismissRequest = {
+                    showDeleteDialog = false
+                    conversationToDelete = null
+                },
+                title = { Text("Sohbeti Sil") },
+                text = {
+                    Text("Bu sohbeti silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")
+                },
+                confirmButton = {
+                    TextButton(
+                            onClick = {
+                                scope.launch {
+                                    viewModel.deleteConversation(conversationToDelete!!.id)
+                                    showDeleteDialog = false
+                                    conversationToDelete = null
+                                }
+                            }
+                    ) { Text("Sil", color = Color.Red) }
+                },
+                dismissButton = {
+                    TextButton(
+                            onClick = {
+                                showDeleteDialog = false
+                                conversationToDelete = null
+                            }
+                    ) { Text("İptal") }
+                }
+        )
     }
 }
 

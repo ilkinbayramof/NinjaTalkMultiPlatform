@@ -89,17 +89,17 @@ class ChatRepository {
         }
     }
 
-    suspend fun clearMessages(conversationId: String, token: String): Result<Unit> {
+    suspend fun deleteConversation(conversationId: String, token: String): Result<Unit> {
         return try {
             val response =
-                    client.delete("$baseUrl/api/chat/conversations/$conversationId/messages") {
+                    client.delete("$baseUrl/api/chat/conversations/$conversationId") {
                         header("Authorization", "Bearer $token")
                     }
 
             if (response.status == HttpStatusCode.OK) {
                 Result.success(Unit)
             } else {
-                Result.failure(Exception("Failed to clear messages: ${response.status}"))
+                Result.failure(Exception("Failed to delete conversation: ${response.status}"))
             }
         } catch (e: Exception) {
             Result.failure(e)

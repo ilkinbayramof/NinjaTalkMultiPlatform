@@ -115,10 +115,6 @@ fun InboxScreen(
                 onBlock = {
                     showBottomSheet = false
                     showBlockDialog = true
-                },
-                onClearChat = {
-                    showBottomSheet = false
-                    viewModel.clearMessages()
                 }
         )
     }
@@ -318,31 +314,24 @@ private fun MessageBubble(message: Message, isOwnMessage: Boolean) {
                                 else NinjaTextSecondary,
                         fontSize = 11.sp
                 )
+                }
             }
         }
     }
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ChatOptionsBottomSheet(
         onDismiss: () -> Unit,
-        onBlock: () -> Unit,
-        onClearChat: () -> Unit
+        onBlock: () -> Unit
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = NinjaSurface) {
-        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             // Block option
             TextButton(onClick = onBlock, modifier = Modifier.fillMaxWidth()) {
                 Text("Engelle", color = Color.Red, fontSize = 16.sp)
             }
-
-            // Clear chat option
-            TextButton(onClick = onClearChat, modifier = Modifier.fillMaxWidth()) {
-                Text("Sohbeti Temizle", color = Color.White, fontSize = 16.sp)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
