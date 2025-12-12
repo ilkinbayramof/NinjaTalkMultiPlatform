@@ -61,6 +61,8 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.client.websockets)
+            implementation(libs.ktor.client.cio) // CIO engine for WebSocket support
             
             // Kotlinx
             implementation(libs.kotlinx.serialization.json)

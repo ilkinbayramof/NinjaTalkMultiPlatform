@@ -47,7 +47,6 @@ class UserRepository {
 
     suspend fun uploadProfileImage(token: String, imageBytes: ByteArray): Result<String> {
         return try {
-            println("Uploading image, size: ${imageBytes.size} bytes")
             val response =
                     client.post("$baseUrl/api/users/profile-image") {
                         header("Authorization", "Bearer $token")
@@ -73,8 +72,6 @@ class UserRepository {
                         )
                     }
 
-            println("Response status: ${response.status}")
-            println("Response body: ${response.bodyAsText()}")
 
             if (response.status == HttpStatusCode.OK) {
                 val responseBody: Map<String, String> = response.body()
@@ -83,7 +80,6 @@ class UserRepository {
                 Result.failure(Exception("Failed to upload image: ${response.status}"))
             }
         } catch (e: Exception) {
-            println("Upload error: ${e.message}")
             e.printStackTrace()
             Result.failure(e)
         }
@@ -142,12 +138,10 @@ class UserRepository {
 
     suspend fun blockUser(userId: String): Result<Unit> {
         return try {
-            println("DEBUG: blockUser called for userId: $userId")
             val token =
                     com.ilkinbayramov.ninjatalk.utils.TokenManager.getToken()
                             ?: return Result.failure(Exception("Not authenticated"))
 
-            println("DEBUG: Token retrieved, making API call to block user")
             val response =
                     client.post("$baseUrl/api/users/block") {
                         header("Authorization", "Bearer $token")
@@ -155,17 +149,13 @@ class UserRepository {
                         setBody(mapOf("blockedUserId" to userId))
                     }
 
-            println("DEBUG: Block API response status: ${response.status}")
             if (response.status == HttpStatusCode.OK) {
-                println("DEBUG: User blocked successfully")
                 Result.success(Unit)
             } else {
                 val errorBody: Map<String, String> = response.body()
-                println("ERROR: Block API failed with error: ${errorBody["error"]}")
                 Result.failure(Exception(errorBody["error"] ?: "Failed to block user"))
             }
         } catch (e: Exception) {
-            println("ERROR: Exception in blockUser: ${e.message}")
             e.printStackTrace()
             Result.failure(e)
         }
@@ -173,28 +163,22 @@ class UserRepository {
 
     suspend fun unblockUser(userId: String): Result<Unit> {
         return try {
-            println("DEBUG: unblockUser called for userId: $userId")
             val token =
                     com.ilkinbayramov.ninjatalk.utils.TokenManager.getToken()
                             ?: return Result.failure(Exception("Not authenticated"))
 
-            println("DEBUG: Token retrieved, making unblock API call")
             val response =
                     client.delete("$baseUrl/api/users/unblock/$userId") {
                         header("Authorization", "Bearer $token")
                     }
 
-            println("DEBUG: Unblock API response status: ${response.status}")
             if (response.status == HttpStatusCode.OK) {
-                println("DEBUG: User unblocked successfully")
                 Result.success(Unit)
             } else {
                 val errorBody: Map<String, String> = response.body()
-                println("ERROR: Unblock API failed: ${errorBody["error"]}")
                 Result.failure(Exception(errorBody["error"] ?: "Failed to unblock user"))
             }
         } catch (e: Exception) {
-            println("ERROR: Exception in unblockUser: ${e.message}")
             e.printStackTrace()
             Result.failure(e)
         }
@@ -202,29 +186,23 @@ class UserRepository {
 
     suspend fun getBlockedUsers(): Result<List<User>> {
         return try {
-            println("DEBUG: getBlockedUsers called")
             val token =
                     com.ilkinbayramov.ninjatalk.utils.TokenManager.getToken()
                             ?: return Result.failure(Exception("Not authenticated"))
 
-            println("DEBUG: Token retrieved, fetching blocked users from API")
             val response =
                     client.get("$baseUrl/api/users/blocked") {
                         header("Authorization", "Bearer $token")
                     }
 
-            println("DEBUG: getBlockedUsers API response status: ${response.status}")
             if (response.status == HttpStatusCode.OK) {
                 val users: List<User> = response.body()
-                println("DEBUG: Received ${users.size} blocked users from API")
                 Result.success(users)
             } else {
                 val errorBody: Map<String, String> = response.body()
-                println("ERROR: getBlockedUsers API failed: ${errorBody["error"]}")
                 Result.failure(Exception(errorBody["error"] ?: "Failed to get blocked users"))
             }
         } catch (e: Exception) {
-            println("ERROR: Exception in getBlockedUsers: ${e.message}")
             e.printStackTrace()
             Result.failure(e)
         }
