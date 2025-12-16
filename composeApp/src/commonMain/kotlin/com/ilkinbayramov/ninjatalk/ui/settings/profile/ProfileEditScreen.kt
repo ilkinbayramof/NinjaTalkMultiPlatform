@@ -243,7 +243,7 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                                             }
 
                                     if (response.status == HttpStatusCode.OK) {
-                                        snackbarHostState.showSnackbar("Biyografi güncellendi!")
+                                        snackbarHostState.showSnackbar("Profil güncellendi!")
                                         onBackClick()
                                     } else {
                                         snackbarHostState.showSnackbar(
