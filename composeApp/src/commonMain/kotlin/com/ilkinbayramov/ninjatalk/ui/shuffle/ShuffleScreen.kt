@@ -21,29 +21,42 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ilkinbayramov.ninjatalk.data.dto.User
 import com.ilkinbayramov.ninjatalk.data.repository.UserRepository
+import com.ilkinbayramov.ninjatalk.presentation.shuffle.ShuffleUiEffect
 import com.ilkinbayramov.ninjatalk.presentation.shuffle.ShuffleUiEvent
 import com.ilkinbayramov.ninjatalk.presentation.shuffle.ShuffleViewModel
 import com.ilkinbayramov.ninjatalk.ui.shuffle.filter.ShuffleFilterBottomSheet
 import com.ilkinbayramov.ninjatalk.ui.theme.*
 
 @Composable
-fun ShuffleScreen(onUserClick: (User) -> Unit = {}) {
-    val viewModel = remember { ShuffleViewModel(UserRepository()) }
+fun ShuffleScreen(
+        currentUser: com.ilkinbayramov.ninjatalk.data.dto.User? = null,
+        onUserClick: (User) -> Unit = {},
+        onNavigateToPremium: () -> Unit = {}
+) {
+    val viewModel = remember(currentUser) { ShuffleViewModel(UserRepository(), currentUser) }
     val state by viewModel.uiState.collectAsState()
     var showFilterSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
-            // Handle effects if needed
+            when (effect) {
+                is ShuffleUiEffect.ShowError -> {
+                    snackbarHostState.showSnackbar(effect.message)
+                }
+                ShuffleUiEffect.NavigateToPremium -> {
+                    onNavigateToPremium()
+                }
+            }
         }
     }
 
     if (showFilterSheet) {
         ShuffleFilterBottomSheet(
                 onDismiss = { showFilterSheet = false },
+                onNavigateToPremium = onNavigateToPremium,
                 onApplyFilters = { filters ->
-                    // TODO: Apply complex filters
+                    viewModel.onEvent(ShuffleUiEvent.ApplyFilters(filters))
                     showFilterSheet = false
                 }
         )

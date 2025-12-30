@@ -4,21 +4,34 @@ import com.ilkinbayramov.ninjatalk.data.ApiClient
 import com.ilkinbayramov.ninjatalk.data.dto.User
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 
 class UserRepository {
     private val client = ApiClient.httpClient
     private val baseUrl = ApiClient.getBaseUrl()
 
-    suspend fun getAllUsers(): Result<List<User>> {
+    suspend fun getAllUsers(
+            minAge: Int? = null,
+            maxAge: Int? = null,
+            gender: String? = null
+    ): Result<List<User>> {
         return try {
             val token =
                     com.ilkinbayramov.ninjatalk.utils.TokenManager.getToken()
                             ?: return Result.failure(Exception("Not authenticated"))
 
+            // Build query parameters
+            val params = mutableListOf<String>()
+            minAge?.let { params.add("minAge=$it") }
+            maxAge?.let { params.add("maxAge=$it") }
+            gender?.let { params.add("gender=$it") }
+
+            val queryString = if (params.isNotEmpty()) "?${params.joinToString("&")}" else ""
+
             val response =
-                    client.get("$baseUrl/api/users") { header("Authorization", "Bearer $token") }
+                    client.get("$baseUrl/api/users$queryString") {
+                        header("Authorization", "Bearer $token")
+                    }
 
             if (response.status == HttpStatusCode.OK) {
                 Result.success(response.body())
@@ -71,7 +84,6 @@ class UserRepository {
                                 )
                         )
                     }
-
 
             if (response.status == HttpStatusCode.OK) {
                 val responseBody: Map<String, String> = response.body()

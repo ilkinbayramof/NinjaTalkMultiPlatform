@@ -38,8 +38,28 @@ fun MainRoute(onLogout: () -> Unit = {}) {
     var currentConversationName by remember { mutableStateOf("Anonim Sohbet") }
     var currentOtherUserId by remember { mutableStateOf<String?>(null) }
     var unreadCount by remember { mutableIntStateOf(0) }
+    var currentUser by remember { mutableStateOf<com.ilkinbayramov.ninjatalk.data.dto.User?>(null) }
     val scope = rememberCoroutineScope()
     val chatRepository = remember { ChatRepository() }
+    val userRepository = remember { com.ilkinbayramov.ninjatalk.data.repository.UserRepository() }
+
+    // Function to refresh current user
+    fun refreshCurrentUser() {
+        scope.launch {
+            val token = TokenManager.getToken()
+            if (token != null) {
+                userRepository.getMe(token).onSuccess { user ->
+                    currentUser = user
+                    println(
+                            "✅ MAIN: User refreshed - email=${user.email}, isPremium=${user.isPremium}"
+                    )
+                }
+            }
+        }
+    }
+
+    // Load current user on init
+    LaunchedEffect(Unit) { refreshCurrentUser() }
 
     // Check for unread messages periodically
     LaunchedEffect(Unit) {
@@ -112,6 +132,7 @@ fun MainRoute(onLogout: () -> Unit = {}) {
                                 )
                         MainTab.Shuffle ->
                                 ShuffleScreen(
+                                        currentUser = currentUser,
                                         onUserClick = { user ->
                                             // Create or get conversation and navigate to inbox
                                             // Use real name since user is initiating the chat
@@ -136,7 +157,8 @@ fun MainRoute(onLogout: () -> Unit = {}) {
                                                             }
                                                 }
                                             }
-                                        }
+                                        },
+                                        onNavigateToPremium = { selectedTab = MainTab.Premium }
                                 )
                         MainTab.Premium -> PlaceholderTab("Premium")
                         MainTab.Profile -> SettingsScreen(onLogout = onLogout)

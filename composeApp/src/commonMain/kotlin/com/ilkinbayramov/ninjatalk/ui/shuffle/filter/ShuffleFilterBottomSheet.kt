@@ -22,7 +22,8 @@ import com.ilkinbayramov.ninjatalk.ui.theme.*
 @Composable
 fun ShuffleFilterBottomSheet(
         onDismiss: () -> Unit,
-        onApplyFilters: (ShuffleFilterState) -> Unit,
+        onNavigateToPremium: () -> Unit,
+        onApplyFilters: ((ShuffleFilterState) -> Unit)? = null,
         viewModel: ShuffleFilterViewModel = ShuffleFilterViewModel()
 ) {
         val state by viewModel.uiState.collectAsState()
@@ -115,7 +116,7 @@ fun ShuffleFilterBottomSheet(
                         // APPLY BUTTON
                         Button(
                                 onClick = {
-                                        onApplyFilters(state)
+                                        onApplyFilters?.invoke(state)
                                         onDismiss()
                                 },
                                 modifier = Modifier.fillMaxWidth().height(54.dp),
