@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.hilt.android)
     kotlin("kapt")
+    id("com.google.gms.google-services") version "4.4.0" apply false
 }
 
 kotlin {
@@ -35,6 +36,9 @@ kotlin {
             
             // Ktor Android Engine
             implementation(libs.ktor.client.android)
+            
+            // Firebase
+            implementation("com.google.firebase:firebase-messaging-ktx:23.4.0")
             
             // Hilt
             implementation(libs.hilt.android)
@@ -116,3 +120,5 @@ dependencies {
     "kapt"(libs.hilt.compiler)
 }
 
+// Apply Google Services plugin for Firebase
+apply(plugin = "com.google.gms.google-services")

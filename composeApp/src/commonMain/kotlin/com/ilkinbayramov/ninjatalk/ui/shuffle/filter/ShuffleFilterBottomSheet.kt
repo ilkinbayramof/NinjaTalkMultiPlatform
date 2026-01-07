@@ -91,7 +91,8 @@ fun ShuffleFilterBottomSheet(
 
                         Spacer(Modifier.height(24.dp))
 
-                        // COUNTRY
+                        // COUNTRY - Commented out for future use
+                        /*
                         Text("ÜLKE", color = NinjaTextSecondary)
                         FilterRowItem(
                                 text = state.selectedCountry ?: "Seç",
@@ -101,6 +102,7 @@ fun ShuffleFilterBottomSheet(
                         )
 
                         Spacer(Modifier.height(24.dp))
+                        */
 
                         // GENDER
                         Text("CİNSİYET", color = NinjaTextSecondary)

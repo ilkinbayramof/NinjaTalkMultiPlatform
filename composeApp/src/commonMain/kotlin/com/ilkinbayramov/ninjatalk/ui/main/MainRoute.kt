@@ -42,6 +42,14 @@ fun MainRoute(onLogout: () -> Unit = {}) {
     val scope = rememberCoroutineScope()
     val chatRepository = remember { ChatRepository() }
     val userRepository = remember { com.ilkinbayramov.ninjatalk.data.repository.UserRepository() }
+    val notificationManager = remember {
+        com.ilkinbayramov.ninjatalk.notification.createNotificationManager()
+    }
+    val webSocketManager = remember {
+        com.ilkinbayramov.ninjatalk.websocket.WebSocketManager(
+                com.ilkinbayramov.ninjatalk.utils.AppConfig.BASE_URL
+        )
+    }
 
     // Function to refresh current user
     fun refreshCurrentUser() {
@@ -53,6 +61,13 @@ fun MainRoute(onLogout: () -> Unit = {}) {
                     println(
                             "✅ MAIN: User refreshed - email=${user.email}, isPremium=${user.isPremium}"
                     )
+                    
+                    // Send FCM token to backend after user is loaded
+                    try {
+                        com.ilkinbayramov.ninjatalk.utils.PlatformFcmTokenManager.sendTokenToBackend()
+                    } catch (e: Exception) {
+                        println("❌ MAIN: FCM token send failed - ${e.message}")
+                    }
                 }
             }
         }
@@ -60,6 +75,38 @@ fun MainRoute(onLogout: () -> Unit = {}) {
 
     // Load current user on init
     LaunchedEffect(Unit) { refreshCurrentUser() }
+
+    // Connect to WebSocket globally
+    LaunchedEffect(Unit) {
+        val token = TokenManager.getToken()
+        if (token != null) {
+            println("🌐 MAIN: Connecting to WebSocket...")
+            webSocketManager.connect(token)
+        }
+    }
+
+    // Listen to WebSocket messages globally for notifications
+    LaunchedEffect(Unit) {
+        webSocketManager.messages.collect { wsMessage ->
+            println("📨 MAIN WS: Received message type=${wsMessage.type}")
+
+            if (wsMessage.type == "new_message") {
+                wsMessage.message?.let { newMessage ->
+                    println(
+                            "📬 MAIN: New message - conversationId=${newMessage.conversationId}, current=${currentConversationId}"
+                    )
+
+                    // FCM already handles notifications, no need to show here
+                    // Just log the message arrival
+                    if (newMessage.conversationId != currentConversationId) {
+                        println("📨 MAIN: Message from different conversation (FCM will notify)")
+                    } else {
+                        println("💬 MAIN: Message in current conversation (no notification needed)")
+                    }
+                }
+            }
+        }
+    }
 
     // Check for unread messages periodically
     LaunchedEffect(Unit) {

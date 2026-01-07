@@ -23,7 +23,10 @@ data class InboxUiState(
 
 class InboxViewModel(
         private val conversationId: String,
-        private val chatRepository: ChatRepository
+        private val chatRepository: ChatRepository,
+        private val notificationManager:
+                com.ilkinbayramov.ninjatalk.notification.PlatformNotificationManager? =
+                null
 ) : ViewModel() {
 
         private val _uiState = MutableStateFlow(InboxUiState())
@@ -85,6 +88,12 @@ class InboxViewModel(
                                                                                                         newMessage
                                                                                 )
                                                                 }
+                                                        } else {
+                                                                // Message from different conversation
+                                                                // FCM already handles notifications
+                                                                println(
+                                                                        "WS: Message from different conversation (FCM will notify)"
+                                                                )
                                                         }
                                                 }
                                         }

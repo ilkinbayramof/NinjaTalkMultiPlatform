@@ -36,7 +36,13 @@ fun InboxScreen(
         conversationName: String = "Anonim Sohbet",
         onBackClick: () -> Unit
 ) {
-    val viewModel = remember { InboxViewModel(conversationId, ChatRepository()) }
+    val viewModel = remember {
+        InboxViewModel(
+                conversationId,
+                ChatRepository(),
+                com.ilkinbayramov.ninjatalk.notification.createNotificationManager()
+        )
+    }
     val state by viewModel.uiState.collectAsState()
     var messageText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
@@ -314,18 +320,14 @@ private fun MessageBubble(message: Message, isOwnMessage: Boolean) {
                                 else NinjaTextSecondary,
                         fontSize = 11.sp
                 )
-                }
             }
         }
     }
-
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ChatOptionsBottomSheet(
-        onDismiss: () -> Unit,
-        onBlock: () -> Unit
-) {
+private fun ChatOptionsBottomSheet(onDismiss: () -> Unit, onBlock: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = NinjaSurface) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             // Block option

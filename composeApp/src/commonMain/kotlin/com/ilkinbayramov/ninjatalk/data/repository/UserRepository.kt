@@ -2,6 +2,7 @@ package com.ilkinbayramov.ninjatalk.data.repository
 
 import com.ilkinbayramov.ninjatalk.data.ApiClient
 import com.ilkinbayramov.ninjatalk.data.dto.User
+import com.ilkinbayramov.ninjatalk.utils.TokenManager
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -215,6 +216,38 @@ class UserRepository {
                 Result.failure(Exception(errorBody["error"] ?: "Failed to get blocked users"))
             }
         } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateFcmToken(fcmToken: String): Result<Unit> {
+        return try {
+            val token =
+                    TokenManager.getToken() ?: return Result.failure(Exception("Not authenticated"))
+
+            println("📤 REPO: Sending FCM token to backend...")
+            println("🔑 REPO: User token: ${token.take(20)}...")
+
+            val response =
+                    client.post("$baseUrl/api/users/fcm-token") {
+                        header("Authorization", "Bearer $token")
+                        contentType(ContentType.Application.Json)
+                        setBody(mapOf("token" to fcmToken))
+                    }
+
+            println("📥 REPO: FCM token response status: ${response.status}")
+
+            if (response.status == HttpStatusCode.OK) {
+                println("✅ REPO: FCM token updated successfully")
+                Result.success(Unit)
+            } else {
+                val errorBody: Map<String, String> = response.body()
+                println("❌ REPO: FCM token update failed - ${errorBody["error"]}")
+                Result.failure(Exception(errorBody["error"] ?: "Failed to update FCM token"))
+            }
+        } catch (e: Exception) {
+            println("❌ REPO: FCM token exception - ${e.message}")
             e.printStackTrace()
             Result.failure(e)
         }
