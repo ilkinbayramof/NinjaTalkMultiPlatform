@@ -21,9 +21,11 @@ class ChatListViewModel(private val chatRepository: ChatRepository) : ViewModel(
         private val _uiState = MutableStateFlow(ChatListUiState())
         val uiState: StateFlow<ChatListUiState> = _uiState.asStateFlow()
 
-        fun loadConversations() {
+        fun loadConversations(showLoading: Boolean = true) {
                 viewModelScope.launch {
-                        _uiState.value = _uiState.value.copy(isLoading = true)
+                        if (showLoading) {
+                                _uiState.value = _uiState.value.copy(isLoading = true)
+                        }
 
                         val token =
                                 TokenManager.getToken()

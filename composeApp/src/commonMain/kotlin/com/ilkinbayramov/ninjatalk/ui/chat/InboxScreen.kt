@@ -23,6 +23,7 @@ import com.ilkinbayramov.ninjatalk.data.repository.ChatRepository
 import com.ilkinbayramov.ninjatalk.presentation.chat.InboxViewModel
 import com.ilkinbayramov.ninjatalk.ui.theme.*
 import com.ilkinbayramov.ninjatalk.utils.TokenManager
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -55,6 +56,14 @@ fun InboxScreen(
 
     // Load userId on screen load
     LaunchedEffect(Unit) { currentUserId = TokenManager.getUserId() }
+
+    // Hər 3 saniyədə yeni mesajları yüklə (real-time update)
+    LaunchedEffect(conversationId) {
+        while (true) {
+            delay(3000)
+            viewModel.loadMessages(showLoading = false)
+        }
+    }
 
     // Check if user is blocked on screen load
     LaunchedEffect(otherUserId) {

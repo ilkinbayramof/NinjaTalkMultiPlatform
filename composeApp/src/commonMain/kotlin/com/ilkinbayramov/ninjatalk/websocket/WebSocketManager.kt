@@ -13,7 +13,12 @@ class WebSocketManager(private val baseUrl: String) {
     private val client = createHttpClient()
 
     private var session: DefaultClientWebSocketSession? = null
-    private val _messages = MutableSharedFlow<WebSocketMessage>()
+
+    // replay=1 + extraBufferCapacity=10: collector hazır olmasa belə mesaj itmir
+    private val _messages = MutableSharedFlow<WebSocketMessage>(
+        replay = 1,
+        extraBufferCapacity = 10
+    )
     val messages: SharedFlow<WebSocketMessage> = _messages.asSharedFlow()
 
     private val _connectionState = MutableStateFlow(false)
@@ -26,16 +31,13 @@ class WebSocketManager(private val baseUrl: String) {
         }
 
         try {
-            // Convert http/https to ws/wss
             val wsUrl = baseUrl.replace("http://", "ws://").replace("https://", "wss://")
-
             println("WS: Connecting to $wsUrl/ws/chat")
 
-            session =
-                    client.webSocketSession {
-                        url("$wsUrl/ws/chat")
-                        header("Authorization", "Bearer $token")
-                    }
+            session = client.webSocketSession {
+                url("$wsUrl/ws/chat")
+                header("Authorization", "Bearer $token")
+            }
 
             _connectionState.value = true
             println("WS: Connected successfully")
@@ -45,7 +47,6 @@ class WebSocketManager(private val baseUrl: String) {
                 if (frame is Frame.Text) {
                     val text = frame.readText()
                     println("WS: Received: $text")
-
                     try {
                         val message = Json.decodeFromString<WebSocketMessage>(text)
                         _messages.emit(message)
@@ -56,22 +57,23 @@ class WebSocketManager(private val baseUrl: String) {
             }
         } catch (e: Exception) {
             println("WS: Connection error: ${e.message}")
-            e.printStackTrace()
+        } finally {
+            // HƏM normal disconnect, HƏM exception-da mütləq false olmalıdır!
+            // Əvvəlki kodda bu yox idi — reconnect mümkün olmurdu
             _connectionState.value = false
+            session = null
+            println("WS: Disconnected")
         }
     }
 
     suspend fun sendMessage(conversationId: String, content: String) {
-        val message =
-                WebSocketMessage(
-                        type = "send_message",
-                        conversationId = conversationId,
-                        content = content
-                )
-
+        val message = WebSocketMessage(
+            type = "send_message",
+            conversationId = conversationId,
+            content = content
+        )
         val json = Json.encodeToString(message)
         println("WS: Sending: $json")
-
         try {
             session?.send(Frame.Text(json))
         } catch (e: Exception) {
@@ -81,7 +83,6 @@ class WebSocketManager(private val baseUrl: String) {
 
     suspend fun sendTyping(conversationId: String) {
         val message = WebSocketMessage(type = "typing", conversationId = conversationId)
-
         try {
             session?.send(Frame.Text(Json.encodeToString(message)))
         } catch (e: Exception) {
@@ -92,11 +93,12 @@ class WebSocketManager(private val baseUrl: String) {
     suspend fun disconnect() {
         try {
             session?.close()
+        } catch (e: Exception) {
+            println("WS: Disconnect error: ${e.message}")
+        } finally {
             session = null
             _connectionState.value = false
             println("WS: Disconnected")
-        } catch (e: Exception) {
-            println("WS: Disconnect error: ${e.message}")
         }
     }
 }

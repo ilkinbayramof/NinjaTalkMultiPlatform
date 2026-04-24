@@ -7,6 +7,7 @@ import com.ilkinbayramov.ninjatalk.data.repository.ChatRepository
 import com.ilkinbayramov.ninjatalk.utils.AppConfig
 import com.ilkinbayramov.ninjatalk.utils.TokenManager
 import com.ilkinbayramov.ninjatalk.websocket.WebSocketManager
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,7 +33,6 @@ class InboxViewModel(
         private val _uiState = MutableStateFlow(InboxUiState())
         val uiState: StateFlow<InboxUiState> = _uiState.asStateFlow()
 
-        // WebSocket Manager with platform-specific URL
         private val webSocketManager = WebSocketManager(AppConfig.BASE_URL)
 
         init {
@@ -50,55 +50,46 @@ class InboxViewModel(
         }
 
         private fun listenToWebSocket() {
+                // Bağlantı vəziyyətini izlə + kəsildikdə avtomatik reconnect
                 viewModelScope.launch {
-                        // Listen for connection state
                         webSocketManager.isConnected.collect { connected ->
                                 _uiState.value = _uiState.value.copy(isConnected = connected)
                                 println("WS: Connection state: $connected")
+
+                                if (!connected) {
+                                        // Bağlantı kəsildi — 2 saniyə gözlə, yenidən qoşul
+                                        delay(2000)
+                                        println("WS: Reconnecting...")
+                                        val token = TokenManager.getToken() ?: return@collect
+                                        // Kəsilmə zamanı gələn mesajları HTTP ilə yüklə
+                                        loadMessages(showLoading = false)
+                                        webSocketManager.connect(token)
+                                }
                         }
                 }
 
+                // Gələn mesajları dinlə
                 viewModelScope.launch {
-                        // Listen for incoming messages
                         webSocketManager.messages.collect { wsMessage ->
                                 println("WS: Received message type: ${wsMessage.type}")
 
                                 when (wsMessage.type) {
                                         "new_message" -> {
                                                 wsMessage.message?.let { newMessage ->
-                                                        if (newMessage.conversationId ==
-                                                                        conversationId
-                                                        ) {
-                                                                println(
-                                                                        "WS: Adding new message to UI"
-                                                                )
-                                                                // Add message if not already in
-                                                                // list
-                                                                if (_uiState.value.messages.none {
-                                                                                it.id ==
-                                                                                        newMessage
-                                                                                                .id
-                                                                        }
-                                                                ) {
-                                                                        _uiState.value =
-                                                                                _uiState.value.copy(
-                                                                                        messages =
-                                                                                                _uiState.value
-                                                                                                        .messages +
-                                                                                                        newMessage
-                                                                                )
+                                                        if (newMessage.conversationId == conversationId) {
+                                                                println("WS: Adding new message to UI")
+                                                                // Eyni mesajı iki dəfə əlavə etmə
+                                                                if (_uiState.value.messages.none { it.id == newMessage.id }) {
+                                                                        _uiState.value = _uiState.value.copy(
+                                                                                messages = _uiState.value.messages + newMessage
+                                                                        )
                                                                 }
                                                         } else {
-                                                                // Message from different conversation
-                                                                // FCM already handles notifications
-                                                                println(
-                                                                        "WS: Message from different conversation (FCM will notify)"
-                                                                )
+                                                                println("WS: Message from different conversation (FCM will notify)")
                                                         }
                                                 }
                                         }
                                         "typing" -> {
-                                                // Handle typing indicator (future feature)
                                                 println("WS: User ${wsMessage.userId} is typing")
                                         }
                                         "connected" -> {
@@ -115,33 +106,29 @@ class InboxViewModel(
                                 _uiState.value = _uiState.value.copy(isLoading = true)
                         }
 
-                        val token =
-                                TokenManager.getToken()
-                                        ?: run {
-                                                _uiState.value =
-                                                        _uiState.value.copy(
-                                                                isLoading = false,
-                                                                error = "Not authenticated"
-                                                        )
-                                                return@launch
-                                        }
+                        val token = TokenManager.getToken()
+                                ?: run {
+                                        _uiState.value = _uiState.value.copy(
+                                                isLoading = false,
+                                                error = "Not authenticated"
+                                        )
+                                        return@launch
+                                }
 
                         chatRepository
                                 .getMessages(conversationId, token)
                                 .onSuccess { messages ->
-                                        _uiState.value =
-                                                _uiState.value.copy(
-                                                        messages = messages,
-                                                        isLoading = false,
-                                                        error = null
-                                                )
+                                        _uiState.value = _uiState.value.copy(
+                                                messages = messages,
+                                                isLoading = false,
+                                                error = null
+                                        )
                                 }
                                 .onFailure { error ->
-                                        _uiState.value =
-                                                _uiState.value.copy(
-                                                        isLoading = false,
-                                                        error = error.message
-                                                )
+                                        _uiState.value = _uiState.value.copy(
+                                                isLoading = false,
+                                                error = error.message
+                                        )
                                 }
                 }
         }
@@ -154,14 +141,12 @@ class InboxViewModel(
                         _uiState.value = _uiState.value.copy(isSending = true)
 
                         try {
-                                // Send via WebSocket
                                 webSocketManager.sendMessage(conversationId, content)
                                 _uiState.value = _uiState.value.copy(isSending = false)
                                 println("DEBUG: Message sent via WebSocket")
                         } catch (e: Exception) {
                                 println("ERROR: Failed to send via WebSocket: ${e.message}")
-                                _uiState.value =
-                                        _uiState.value.copy(isSending = false, error = e.message)
+                                _uiState.value = _uiState.value.copy(isSending = false, error = e.message)
                         }
                 }
         }

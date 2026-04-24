@@ -6,6 +6,8 @@
 	objectVersion = 77;
 	objects = {
 
+		AA01BB02CC03DD04EE05FF08 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = AA01BB02CC03DD04EE05FF06 /* FirebaseCore */; };
+		AA01BB02CC03DD04EE05FF09 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = AA01BB02CC03DD04EE05FF07 /* FirebaseMessaging */; };
 /* Begin PBXFileReference section */
 		D99E61C8C1C301F0B2166D42 /* NinjaTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NinjaTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -41,6 +43,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA01BB02CC03DD04EE05FF08 /* FirebaseCore in Frameworks */,
+				AA01BB02CC03DD04EE05FF09 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -374,6 +378,11 @@
 		};
 /* End XCConfigurationList section */
 
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA01BB02CC03DD04EE05FF06 /* FirebaseCore */ = {isa = XCSwiftPackageProductDependency; package = 20DDCDAD2F0E93310017515D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */; productName = FirebaseCore; };
+		AA01BB02CC03DD04EE05FF07 /* FirebaseMessaging */ = {isa = XCSwiftPackageProductDependency; package = 20DDCDAD2F0E93310017515D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */; productName = FirebaseMessaging; };
+/* End XCSwiftPackageProductDependency section */
 /* Begin XCRemoteSwiftPackageReference section */
 		20DDCDAD2F0E93310017515D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;

@@ -24,6 +24,7 @@ import com.ilkinbayramov.ninjatalk.data.dto.Conversation
 import com.ilkinbayramov.ninjatalk.data.repository.ChatRepository
 import com.ilkinbayramov.ninjatalk.presentation.chat.ChatListViewModel
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -35,6 +36,14 @@ fun ChatListScreen(onConversationClick: (String) -> Unit) {
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) { viewModel.loadConversations() }
+
+    // Hər 3 saniyədə conversations siyahısını yenilə (unread badge real-time)
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(3000)
+            viewModel.loadConversations(showLoading = false)
+        }
+    }
 
     Scaffold(containerColor = NinjaBackground) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
