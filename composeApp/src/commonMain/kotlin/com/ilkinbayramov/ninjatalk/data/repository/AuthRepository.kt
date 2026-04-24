@@ -2,6 +2,7 @@ package com.ilkinbayramov.ninjatalk.data.repository
 
 import com.ilkinbayramov.ninjatalk.data.ApiClient
 import com.ilkinbayramov.ninjatalk.data.dto.AuthResponse
+import com.ilkinbayramov.ninjatalk.data.dto.ForgotPasswordRequest
 import com.ilkinbayramov.ninjatalk.data.dto.LoginRequest
 import com.ilkinbayramov.ninjatalk.data.dto.RegisterRequest
 import io.ktor.client.call.*
@@ -51,6 +52,25 @@ class AuthRepository {
                             .body<AuthResponse>()
 
             Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun forgotPassword(email: String): Result<Unit> {
+        return try {
+            val response =
+                    client
+                            .post("$baseUrl/api/auth/forgot-password") {
+                                contentType(ContentType.Application.Json)
+                                setBody(ForgotPasswordRequest(email = email))
+                            }
+
+            if (response.status.isSuccess()) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Bir hata oluştu"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }

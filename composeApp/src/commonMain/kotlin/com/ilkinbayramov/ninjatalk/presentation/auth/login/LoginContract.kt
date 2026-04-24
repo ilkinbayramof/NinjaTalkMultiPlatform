@@ -15,10 +15,12 @@ sealed interface LoginUiEvent {
     data object TogglePasswordVisibility : LoginUiEvent
     data object LoginClick : LoginUiEvent
     data object RegisterClick : LoginUiEvent
+    data class ForgotPasswordClick(val email: String) : LoginUiEvent
 }
 
 sealed interface LoginUiEffect {
     data class ShowErrorMessage(val message: String) : LoginUiEffect
+    data class ShowSuccessMessage(val message: String) : LoginUiEffect
     data object NavigateToHome : LoginUiEffect
     data object NavigateToRegister : LoginUiEffect
 }

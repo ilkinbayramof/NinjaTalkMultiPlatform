@@ -30,6 +30,7 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
         var showProfileEdit by remember { mutableStateOf(false) }
         var showPasswordChange by remember { mutableStateOf(false) }
         var showBlockedUsers by remember { mutableStateOf(false) }
+        var showPrivacyPolicy by remember { mutableStateOf(false) }
 
         if (showProfileEdit) {
                 com.ilkinbayramov.ninjatalk.ui.settings.profile.ProfileEditScreen(
@@ -48,6 +49,13 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
         if (showBlockedUsers) {
                 com.ilkinbayramov.ninjatalk.ui.settings.blocked.BlockedUsersScreen(
                         onBackClick = { showBlockedUsers = false }
+                )
+                return
+        }
+
+        if (showPrivacyPolicy) {
+                com.ilkinbayramov.ninjatalk.ui.settings.privacy.PrivacyPolicyScreen(
+                        onBackClick = { showPrivacyPolicy = false }
                 )
                 return
         }
@@ -84,6 +92,11 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                                                 "Engellenen Kullanıcılar",
                                                 null,
                                                 Icons.Default.Block
+                                        ),
+                                        SettingItemData(
+                                                "Gizlilik Politikası",
+                                                null,
+                                                Icons.Default.Security
                                         )
                                 )
                         ),
@@ -212,6 +225,8 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                                                                         showPasswordChange = true
                                                                 "Engellenen Kullanıcılar" ->
                                                                         showBlockedUsers = true
+                                                                "Gizlilik Politikası" ->
+                                                                        showPrivacyPolicy = true
                                                         }
                                                 }
                                         )

@@ -28,10 +28,16 @@ fun LoginScreen(
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var showForgotPasswordDialog by remember { mutableStateOf(false) }
+    var forgotPasswordEmail by remember { mutableStateOf("") }
+
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is LoginUiEffect.ShowErrorMessage -> {
+                    snackbarHostState.showSnackbar(effect.message)
+                }
+                is LoginUiEffect.ShowSuccessMessage -> {
                     snackbarHostState.showSnackbar(effect.message)
                 }
                 LoginUiEffect.NavigateToHome -> onNavigateToHome()
@@ -53,8 +59,52 @@ fun LoginScreen(
                 },
                 onLoginClick = { viewModel.onEvent(LoginUiEvent.LoginClick) },
                 onNavigateToRegister = { viewModel.onEvent(LoginUiEvent.RegisterClick) },
+                onForgotPasswordClick = { showForgotPasswordDialog = true },
                 modifier = Modifier.padding(padding)
         )
+
+        if (showForgotPasswordDialog) {
+            AlertDialog(
+                onDismissRequest = { showForgotPasswordDialog = false },
+                containerColor = NinjaSurface,
+                title = { Text("Şifremi Unuttum", color = Color.White) },
+                text = {
+                    Column {
+                        Text(
+                            text = "Kayıtlı e-posta adresinizi girin. Size bir şifre sıfırlama linki göndereceğiz.",
+                            color = NinjaTextSecondary,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        NinjaTextField(
+                            label = "E-posta",
+                            placeholder = "E-posta adresiniz",
+                            value = forgotPasswordEmail,
+                            onValueChange = { forgotPasswordEmail = it },
+                            errorText = null,
+                            keyboardType = KeyboardType.Email
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.onEvent(LoginUiEvent.ForgotPasswordClick(forgotPasswordEmail))
+                            showForgotPasswordDialog = false
+                            forgotPasswordEmail = ""
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = NinjaPrimary)
+                    ) {
+                        Text("Gönder", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showForgotPasswordDialog = false }) {
+                        Text("İptal", color = Color.White)
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -66,6 +116,7 @@ private fun LoginScreenContent(
         onTogglePasswordVisibility: () -> Unit,
         onLoginClick: () -> Unit,
         onNavigateToRegister: () -> Unit,
+        onForgotPasswordClick: () -> Unit,
         modifier: Modifier = Modifier
 ) {
     Column(
@@ -125,7 +176,7 @@ private fun LoginScreenContent(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier =
                             Modifier.clickable {
-                                // TODO: Şifre sıfırlama
+                                onForgotPasswordClick()
                             }
             )
         }

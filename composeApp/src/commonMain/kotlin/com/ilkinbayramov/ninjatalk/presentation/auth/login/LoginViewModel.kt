@@ -21,6 +21,27 @@ class LoginViewModel(private val authRepository: AuthRepository) :
                     setState { copy(isPasswordVisible = !isPasswordVisible) }
             LoginUiEvent.LoginClick -> validateAndLogin()
             LoginUiEvent.RegisterClick -> sendEffect { LoginUiEffect.NavigateToRegister }
+            is LoginUiEvent.ForgotPasswordClick -> forgotPassword(event.email)
+        }
+    }
+
+    private fun forgotPassword(email: String) {
+        if (email.isBlank()) {
+            sendEffect { LoginUiEffect.ShowErrorMessage("Lütfen geçerli bir e-posta adresi girin") }
+            return
+        }
+
+        viewModelScope.launch {
+            setState { copy(isLoading = true) }
+            authRepository.forgotPassword(email)
+                .onSuccess {
+                    setState { copy(isLoading = false) }
+                    sendEffect { LoginUiEffect.ShowSuccessMessage("Şifre sıfırlama linki e-postanıza gönderildi.") }
+                }
+                .onFailure { error ->
+                    setState { copy(isLoading = false) }
+                    sendEffect { LoginUiEffect.ShowErrorMessage(error.message ?: "Bir hata oluştu") }
+                }
         }
     }
 

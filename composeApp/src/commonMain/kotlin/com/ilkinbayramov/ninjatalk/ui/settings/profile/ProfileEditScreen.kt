@@ -43,6 +43,7 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
     var bio by remember {
         mutableStateOf("Yeni insanlarla tanışmayı seviyorum. Bana bir mesaj gönder!")
     }
+    var username by remember { mutableStateOf("") }
     var profileImageUrl by remember { mutableStateOf<String?>(null) }
     var selectedImageBytes by remember { mutableStateOf<ByteArray?>(null) }
     var isLoading by remember { mutableStateOf(false) }
@@ -61,6 +62,7 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                     .onSuccess { user ->
                         user.bio?.let { bio = it }
                         user.profileImageUrl?.let { profileImageUrl = it }
+                        username = user.email.substringBefore("@")
                         isLoading = false
                     }
                     .onFailure {
@@ -190,6 +192,31 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
+
+                // Username Section
+                Text(
+                        text = "Kullanıcı Adı",
+                        color = NinjaTextSecondary,
+                        fontSize = 14.sp,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                )
+
+                OutlinedTextField(
+                        value = username,
+                        onValueChange = { },
+                        enabled = false,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors =
+                                OutlinedTextFieldDefaults.colors(
+                                        disabledContainerColor = NinjaSurface,
+                                        disabledTextColor = Color.Gray,
+                                        disabledBorderColor = Color.Transparent
+                                ),
+                        singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Biyografi Section
                 Text(
