@@ -13,31 +13,52 @@ import com.ilkinbayramov.ninjatalk.presentation.auth.login.LoginViewModel
 import com.ilkinbayramov.ninjatalk.ui.auth.LoginScreen
 import com.ilkinbayramov.ninjatalk.ui.auth.RegisterScreen
 import com.ilkinbayramov.ninjatalk.ui.main.MainRoute
+import com.ilkinbayramov.ninjatalk.localization.*
 import kotlinx.coroutines.launch
+
+val LocalLanguageController = staticCompositionLocalOf<(AppLanguage) -> Unit> { {} }
 
 @Composable
 fun App() {
-    MaterialTheme {
-        var currentScreen by remember { mutableStateOf<String?>(null) } // null = checking
-        val scope = rememberCoroutineScope()
+    var currentScreen by remember { mutableStateOf<String?>(null) } // null = checking
+    var currentLanguage by remember { mutableStateOf(AppLanguage.TURKISH) }
+    var isLanguageLoaded by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
         val authRepository = remember { AuthRepository() }
 
-        // Check for existing token on app start
+        // Check for existing token and language on app start
         LaunchedEffect(Unit) {
+            val savedLangCode = com.ilkinbayramov.ninjatalk.utils.TokenManager.getLanguage()
+            currentLanguage = AppLanguage.fromCode(savedLangCode)
+            isLanguageLoaded = true
+            
             val token = com.ilkinbayramov.ninjatalk.utils.TokenManager.getToken()
             currentScreen = if (token != null) "main" else "register"
         }
 
-        // Show loading while checking token
-        if (currentScreen == null) {
+        // Show loading while checking token or language
+        if (currentScreen == null || !isLanguageLoaded) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Loading...", style = MaterialTheme.typography.bodyLarge)
             }
-            return@MaterialTheme
+            return
         }
 
-        when (currentScreen) {
+        val appStrings = if (currentLanguage == AppLanguage.AZERBAIJANI) azStrings else trStrings
+        val changeLanguage: (AppLanguage) -> Unit = { newLang ->
+            currentLanguage = newLang
+            scope.launch {
+                com.ilkinbayramov.ninjatalk.utils.TokenManager.setLanguage(newLang.code)
+            }
+        }
+
+        CompositionLocalProvider(
+            LocalAppStrings provides appStrings,
+            LocalLanguageController provides changeLanguage
+        ) {
+            MaterialTheme {
+                when (currentScreen) {
             "register" -> {
                 val registerViewModel =
                         remember(currentScreen) { RegisterViewModel(authRepository) }
@@ -68,6 +89,7 @@ fun App() {
             }
         }
     }
+}
 }
 
 @Composable

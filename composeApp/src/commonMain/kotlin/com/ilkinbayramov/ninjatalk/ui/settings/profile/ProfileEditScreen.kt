@@ -25,6 +25,7 @@ import com.ilkinbayramov.ninjatalk.data.ApiClient
 import com.ilkinbayramov.ninjatalk.data.TokenManager
 import com.ilkinbayramov.ninjatalk.data.repository.UserRepository
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.localization.LocalAppStrings
 import com.ilkinbayramov.ninjatalk.utils.ImagePicker
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -38,10 +39,11 @@ expect @Composable fun rememberImagePicker(): ImagePicker
 
 @Composable
 fun ProfileEditScreen(onBackClick: () -> Unit) {
+    val strings = LocalAppStrings.current
     val imagePicker = rememberImagePicker()
 
     var bio by remember {
-        mutableStateOf("Yeni insanlarla tanışmayı seviyorum. Bana bir mesaj gönder!")
+        mutableStateOf(strings.defaultBio)
     }
     var username by remember { mutableStateOf("") }
     var profileImageUrl by remember { mutableStateOf<String?>(null) }
@@ -66,7 +68,7 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                         isLoading = false
                     }
                     .onFailure {
-                        snackbarHostState.showSnackbar("Profil yüklenemedi: ${it.message}")
+                        snackbarHostState.showSnackbar("${strings.profileLoadError}: ${it.message}")
                         isLoading = false
                     }
         }
@@ -84,10 +86,10 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                             profileImageUrl = imageUrl
                             selectedImageBytes = null
                             isUploadingImage = false
-                            snackbarHostState.showSnackbar("Profil fotoğrafı güncellendi!")
+                            snackbarHostState.showSnackbar(strings.profilePhotoUpdated)
                         }
                         .onFailure {
-                            snackbarHostState.showSnackbar("Fotoğraf yüklenemedi: ${it.message}")
+                            snackbarHostState.showSnackbar("${strings.photoUploadError}: ${it.message}")
                             selectedImageBytes = null
                             isUploadingImage = false
                         }
@@ -108,13 +110,13 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                 IconButton(onClick = onBackClick) {
                     Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Geri",
+                            contentDescription = strings.back,
                             tint = Color.White
                     )
                 }
 
                 Text(
-                        text = "Profil Düzenle",
+                        text = strings.editProfile,
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
@@ -168,7 +170,6 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                         }
                     }
 
-                    // Edit Button
                     Box(
                             modifier =
                                     Modifier.size(36.dp)
@@ -184,7 +185,7 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                     ) {
                         Icon(
                                 imageVector = Icons.Default.Edit,
-                                contentDescription = "Düzenle",
+                                contentDescription = strings.editProfile,
                                 tint = Color.White,
                                 modifier = Modifier.size(18.dp)
                         )
@@ -195,7 +196,7 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
 
                 // Username Section
                 Text(
-                        text = "Kullanıcı Adı",
+                        text = strings.username,
                         color = NinjaTextSecondary,
                         fontSize = 14.sp,
                         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
@@ -220,7 +221,7 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
 
                 // Biyografi Section
                 Text(
-                        text = "Biyografi",
+                        text = strings.bio,
                         color = NinjaTextSecondary,
                         fontSize = 14.sp,
                         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
@@ -255,7 +256,7 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                                     val token = tokenManager.getToken()
                                     if (token == null) {
                                         snackbarHostState.showSnackbar(
-                                                "Oturum süresi dolmuş, lütfen tekrar giriş yapın"
+                                                strings.sessionExpired
                                         )
                                         return@launch
                                     }
@@ -270,15 +271,15 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                                             }
 
                                     if (response.status == HttpStatusCode.OK) {
-                                        snackbarHostState.showSnackbar("Profil güncellendi!")
+                                        snackbarHostState.showSnackbar(strings.profileUpdated)
                                         onBackClick()
                                     } else {
                                         snackbarHostState.showSnackbar(
-                                                "Hata: ${response.bodyAsText()}"
+                                                "${strings.error}: ${response.bodyAsText()}"
                                         )
                                     }
                                 } catch (e: Exception) {
-                                    snackbarHostState.showSnackbar("Hata: ${e.message}")
+                                    snackbarHostState.showSnackbar("${strings.error}: ${e.message}")
                                 } finally {
                                     isLoading = false
                                 }
@@ -295,7 +296,7 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                                 modifier = Modifier.size(24.dp)
                         )
                     } else {
-                        Text("Kaydet", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                        Text(strings.save, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
                     }
                 }
 

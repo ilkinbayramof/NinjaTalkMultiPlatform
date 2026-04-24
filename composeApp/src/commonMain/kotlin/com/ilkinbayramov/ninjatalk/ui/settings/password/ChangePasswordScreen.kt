@@ -17,10 +17,12 @@ import androidx.compose.ui.unit.dp
 import com.ilkinbayramov.ninjatalk.data.repository.UserRepository
 import com.ilkinbayramov.ninjatalk.presentation.settings.ChangePasswordViewModel
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.localization.LocalAppStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangePasswordScreen(onBackClick: () -> Unit) {
+    val strings = LocalAppStrings.current
     val viewModel = remember { ChangePasswordViewModel(UserRepository()) }
     val state by viewModel.uiState.collectAsState()
 
@@ -40,7 +42,7 @@ fun ChangePasswordScreen(onBackClick: () -> Unit) {
                     viewModel.clearMessages()
                     onBackClick()
                 },
-                title = { Text("Başarılı") },
+                title = { Text(strings.success) },
                 text = { Text(state.successMessage ?: "") },
                 confirmButton = {
                     TextButton(
@@ -49,7 +51,7 @@ fun ChangePasswordScreen(onBackClick: () -> Unit) {
                                 viewModel.clearMessages()
                                 onBackClick()
                             }
-                    ) { Text("Tamam") }
+                    ) { Text(strings.ok) }
                 },
                 containerColor = NinjaSurface
         )
@@ -61,7 +63,7 @@ fun ChangePasswordScreen(onBackClick: () -> Unit) {
                 TopAppBar(
                         title = {
                             Text(
-                                    text = "Şifre Değiştir",
+                                    text = strings.changePassword,
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold
                             )
@@ -70,7 +72,7 @@ fun ChangePasswordScreen(onBackClick: () -> Unit) {
                             IconButton(onClick = onBackClick) {
                                 Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "Back",
+                                        contentDescription = strings.back,
                                         tint = Color.White
                                 )
                             }
@@ -81,7 +83,7 @@ fun ChangePasswordScreen(onBackClick: () -> Unit) {
                                     enabled = !state.isLoading
                             ) {
                                 Text(
-                                        text = "Kaydet",
+                                        text = strings.save,
                                         color =
                                                 if (state.isLoading) NinjaTextSecondary
                                                 else NinjaPrimary,
@@ -112,7 +114,7 @@ fun ChangePasswordScreen(onBackClick: () -> Unit) {
             OutlinedTextField(
                     value = state.currentPassword,
                     onValueChange = { viewModel.onCurrentPasswordChange(it) },
-                    label = { Text("Mevcut Şifre") },
+                    label = { Text(strings.currentPassword) },
                     visualTransformation =
                             if (state.isCurrentPasswordVisible) VisualTransformation.None
                             else PasswordVisualTransformation(),
@@ -150,7 +152,7 @@ fun ChangePasswordScreen(onBackClick: () -> Unit) {
             OutlinedTextField(
                     value = state.newPassword,
                     onValueChange = { viewModel.onNewPasswordChange(it) },
-                    label = { Text("Yeni Şifre") },
+                    label = { Text(strings.newPassword) },
                     visualTransformation =
                             if (state.isNewPasswordVisible) VisualTransformation.None
                             else PasswordVisualTransformation(),
@@ -187,7 +189,7 @@ fun ChangePasswordScreen(onBackClick: () -> Unit) {
             OutlinedTextField(
                     value = state.confirmPassword,
                     onValueChange = { viewModel.onConfirmPasswordChange(it) },
-                    label = { Text("Yeni Şifre (Tekrar)") },
+                    label = { Text(strings.newPasswordConfirm) },
                     visualTransformation =
                             if (state.isConfirmPasswordVisible) VisualTransformation.None
                             else PasswordVisualTransformation(),

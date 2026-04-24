@@ -21,21 +21,24 @@ import com.ilkinbayramov.ninjatalk.ui.chat.InboxScreen
 import com.ilkinbayramov.ninjatalk.ui.settings.SettingsScreen
 import com.ilkinbayramov.ninjatalk.ui.shuffle.ShuffleScreen
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.localization.LocalAppStrings
+import com.ilkinbayramov.ninjatalk.localization.AppStrings
 import com.ilkinbayramov.ninjatalk.utils.TokenManager
 import kotlinx.coroutines.launch
 
-sealed class MainTab(val route: String, val label: String, val icon: ImageVector) {
-    object Chat : MainTab("chat", "Sohbet", Icons.Default.Chat)
-    object Shuffle : MainTab("shuffle", "Keşfet", Icons.Default.Shuffle)
-    object Premium : MainTab("premium", "Premium", Icons.Default.Star)
-    object Profile : MainTab("profile", "Profil", Icons.Default.Person)
+sealed class MainTab(val route: String, val label: (AppStrings) -> String, val icon: ImageVector) {
+    object Chat : MainTab("chat", { it.chat }, Icons.Default.Chat)
+    object Shuffle : MainTab("shuffle", { it.shuffle }, Icons.Default.Shuffle)
+    object Premium : MainTab("premium", { it.premium }, Icons.Default.Star)
+    object Profile : MainTab("profile", { it.profile }, Icons.Default.Person)
 }
 
 @Composable
 fun MainRoute(onLogout: () -> Unit = {}) {
+    val strings = LocalAppStrings.current
     var selectedTab by remember { mutableStateOf<MainTab>(MainTab.Shuffle) }
     var currentConversationId by remember { mutableStateOf<String?>(null) }
-    var currentConversationName by remember { mutableStateOf("Anonim Sohbet") }
+    var currentConversationName by remember { mutableStateOf(strings.anonymousChat) }
     var currentOtherUserId by remember { mutableStateOf<String?>(null) }
     var unreadCount by remember { mutableIntStateOf(0) }
     var currentUser by remember { mutableStateOf<com.ilkinbayramov.ninjatalk.data.dto.User?>(null) }
@@ -167,7 +170,7 @@ fun MainRoute(onLogout: () -> Unit = {}) {
                                                                 currentConversationName =
                                                                         conversation
                                                                                 ?.otherUserAnonymousName
-                                                                                ?: "Anonim Sohbet"
+                                                                                ?: strings.anonymousChat
                                                                 currentOtherUserId =
                                                                         conversation?.otherUserId
                                                                 currentConversationId =
@@ -276,7 +279,7 @@ private fun BottomItem(
         Box {
             Icon(
                     imageVector = tab.icon,
-                    contentDescription = tab.label,
+                    contentDescription = tab.label(LocalAppStrings.current),
                     tint = if (isSelected) Color.White else Color(0xFF7A7A7A),
                     modifier = Modifier.size(22.dp)
             )
@@ -304,7 +307,7 @@ private fun BottomItem(
         Spacer(modifier = Modifier.height(2.dp))
 
         Text(
-                text = tab.label,
+                text = tab.label(LocalAppStrings.current),
                 style = MaterialTheme.typography.labelSmall,
                 color = if (isSelected) Color.White else Color(0xFF7A7A7A)
         )
@@ -324,11 +327,13 @@ private fun BottomItem(
 
 @Composable
 private fun PlaceholderTab(title: String) {
+    val strings = LocalAppStrings.current
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
-                text = "$title\n(Yakında)",
+                text = "$title\n(${strings.comingSoon})",
                 color = NinjaTextSecondary,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
     }
 }

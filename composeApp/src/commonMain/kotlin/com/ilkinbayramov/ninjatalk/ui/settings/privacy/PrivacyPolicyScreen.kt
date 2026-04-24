@@ -17,20 +17,22 @@ import com.ilkinbayramov.ninjatalk.ui.theme.NinjaBackground
 import com.ilkinbayramov.ninjatalk.ui.theme.NinjaPrimary
 import com.ilkinbayramov.ninjatalk.ui.theme.NinjaSurface
 import com.ilkinbayramov.ninjatalk.ui.theme.NinjaTextSecondary
+import com.ilkinbayramov.ninjatalk.localization.LocalAppStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrivacyPolicyScreen(onBackClick: () -> Unit) {
+    val strings = LocalAppStrings.current
     Scaffold(
         containerColor = NinjaBackground,
         topBar = {
             TopAppBar(
-                title = { Text("Gizlilik Politikası", color = Color.White) },
+                title = { Text(strings.privacyPolicy, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = strings.back,
                             tint = Color.White
                         )
                     }
@@ -47,35 +49,35 @@ fun PrivacyPolicyScreen(onBackClick: () -> Unit) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Son Güncelleme: 24 Nisan 2026",
+                text = strings.lastUpdate,
                 color = NinjaTextSecondary,
                 fontSize = 14.sp,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
             PolicySection(
-                title = "1. Toplanan Veriler",
-                content = "NinjaTalk uygulamasını kullanırken e-posta adresiniz, cinsiyetiniz, doğum tarihiniz, biyografiniz ve profil fotoğrafınız uygulamanın temel işlevlerini sağlamak amacıyla toplanmaktadır. Ayrıca, mesajlaşma geçmişiniz ve engellediğiniz kullanıcı bilgileri güvenli bir şekilde sunucularımızda saklanmaktadır."
+                title = strings.privacyDataCollectedTitle,
+                content = strings.privacyDataCollectedContent
             )
 
             PolicySection(
-                title = "2. Veri Kullanımı",
-                content = "Toplanan veriler yalnızca hesabınızı yönetmek, diğer kullanıcılarla iletişim kurmanızı sağlamak (mesajlaşma) ve kişiselleştirilmiş bir deneyim sunmak için kullanılır. Verileriniz hiçbir şekilde izniniz olmadan 3. şahıslarla paylaşılmaz."
+                title = strings.privacyDataUseTitle,
+                content = strings.privacyDataUseContent
             )
 
             PolicySection(
-                title = "3. Veri Güvenliği",
-                content = "Kullanıcı bilgileri, mesajlaşmalar ve oturum açma tokenları, yetkisiz erişime karşı korunmak için güvenli sunucularda barındırılmakta ve şifreli bir şekilde iletilmektedir."
+                title = strings.privacyDataSecurityTitle,
+                content = strings.privacyDataSecurityContent
             )
 
             PolicySection(
-                title = "4. Hesap Silme ve Veri İptali",
-                content = "İstediğiniz zaman Ayarlar bölümünden 'Hesabı Sil' seçeneğini kullanarak hesabınızı ve ilişkili tüm verilerinizi (mesajlar, profil bilgileri, ayarlar) kalıcı olarak silebilirsiniz. Hesap silindikten sonra verilerin geri getirilmesi mümkün değildir."
+                title = strings.privacyAccountDeletionTitle,
+                content = strings.privacyAccountDeletionContent
             )
 
             PolicySection(
-                title = "5. Uygulama İzinleri",
-                content = "Uygulama, size yeni mesajları anında bildirebilmek için bildirim izni isteyebilir. Bu izinleri cihaz ayarlarınızdan veya uygulama içi Ayarlar bölümünden dilediğiniz zaman yönetebilirsiniz."
+                title = strings.privacyPermissionsTitle,
+                content = strings.privacyPermissionsContent
             )
             
             Spacer(modifier = Modifier.height(24.dp))

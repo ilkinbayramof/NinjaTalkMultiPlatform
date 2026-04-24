@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ilkinbayramov.ninjatalk.presentation.auth.login.*
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.localization.LocalAppStrings
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -25,6 +26,7 @@ fun LoginScreen(
         onNavigateToRegister: () -> Unit,
         onNavigateToHome: () -> Unit
 ) {
+    val strings = LocalAppStrings.current
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -67,18 +69,18 @@ fun LoginScreen(
             AlertDialog(
                 onDismissRequest = { showForgotPasswordDialog = false },
                 containerColor = NinjaSurface,
-                title = { Text("Şifremi Unuttum", color = Color.White) },
+                title = { Text(strings.forgotPassword, color = Color.White) },
                 text = {
                     Column {
                         Text(
-                            text = "Kayıtlı e-posta adresinizi girin. Size bir şifre sıfırlama linki göndereceğiz.",
+                            text = strings.forgotPasswordDesc,
                             color = NinjaTextSecondary,
                             fontSize = 14.sp
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         NinjaTextField(
-                            label = "E-posta",
-                            placeholder = "E-posta adresiniz",
+                            label = strings.email,
+                            placeholder = strings.email,
                             value = forgotPasswordEmail,
                             onValueChange = { forgotPasswordEmail = it },
                             errorText = null,
@@ -95,12 +97,12 @@ fun LoginScreen(
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = NinjaPrimary)
                     ) {
-                        Text("Gönder", color = Color.White)
+                        Text(strings.send, color = Color.White)
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showForgotPasswordDialog = false }) {
-                        Text("İptal", color = Color.White)
+                        Text(strings.cancel, color = Color.White)
                     }
                 }
             )
@@ -119,6 +121,7 @@ private fun LoginScreenContent(
         onForgotPasswordClick: () -> Unit,
         modifier: Modifier = Modifier
 ) {
+    val strings = LocalAppStrings.current
     Column(
             modifier =
                     modifier.fillMaxSize().background(NinjaBackground).padding(horizontal = 24.dp),
@@ -134,7 +137,7 @@ private fun LoginScreenContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-                text = "Gerçek Seni Keşfet",
+                text = strings.discoverRealYou,
                 style =
                         MaterialTheme.typography.headlineSmall.copy(
                                 color = Color.White,
@@ -145,8 +148,8 @@ private fun LoginScreenContent(
         Spacer(modifier = Modifier.height(28.dp))
 
         NinjaTextField(
-                label = "Kullanıcı Adı veya E-posta",
-                placeholder = "Kullanıcı adınızı veya e-postanızı girin",
+                label = strings.usernameOrEmail,
+                placeholder = strings.usernameOrEmailPlaceholder,
                 value = state.email,
                 onValueChange = onEmailChanged,
                 errorText = state.emailError,
@@ -156,8 +159,8 @@ private fun LoginScreenContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         NinjaTextField(
-                label = "Şifre",
-                placeholder = "Şifrenizi girin",
+                label = strings.password,
+                placeholder = strings.passwordPlaceholder,
                 value = state.password,
                 onValueChange = onPasswordChanged,
                 errorText = state.passwordError,
@@ -171,7 +174,7 @@ private fun LoginScreenContent(
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             Text(
-                    text = "Şifremi Unuttum?",
+                    text = strings.forgotPasswordQuestion,
                     color = NinjaPrimary,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier =
@@ -201,16 +204,16 @@ private fun LoginScreenContent(
                         strokeWidth = 2.dp
                 )
             } else {
-                Text(text = "Giriş Yap", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(text = strings.login, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Row {
-            Text(text = "Hesabın yok mu? ", color = NinjaTextSecondary)
+            Text(text = strings.dontHaveAccountText, color = NinjaTextSecondary)
             Text(
-                    text = "Kaydol",
+                    text = strings.signUpText,
                     color = NinjaPrimary,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable { onNavigateToRegister() }
@@ -220,7 +223,7 @@ private fun LoginScreenContent(
         Spacer(modifier = Modifier.height(40.dp))
 
         Text(
-                text = "Gizlilik Politikası  ·  Kullanım Koşulları",
+                text = strings.footerText,
                 color = NinjaTextSecondary,
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,

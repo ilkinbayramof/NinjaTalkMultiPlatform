@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ilkinbayramov.ninjatalk.presentation.auth.*
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.localization.LocalAppStrings
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,6 +101,7 @@ private fun RegisterScreenContent(
         onLoginClick: () -> Unit,
         modifier: Modifier = Modifier
 ) {
+        val strings = LocalAppStrings.current
         Column(
                 modifier =
                         modifier.fillMaxSize()
@@ -119,7 +121,7 @@ private fun RegisterScreenContent(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                        text = "Hesabını Oluştur",
+                        text = strings.createAccount,
                         style =
                                 MaterialTheme.typography.headlineSmall.copy(
                                         fontWeight = FontWeight.Bold,
@@ -130,8 +132,8 @@ private fun RegisterScreenContent(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 NinjaTextField(
-                        label = "E-posta Adresi",
-                        placeholder = "E-posta adresini gir",
+                        label = strings.emailAddress,
+                        placeholder = strings.emailPlaceholder,
                         value = state.email,
                         onValueChange = onEmailChanged,
                         errorText = state.emailError,
@@ -141,8 +143,8 @@ private fun RegisterScreenContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 NinjaTextField(
-                        label = "Şifre",
-                        placeholder = "Bir şifre belirle",
+                        label = strings.password,
+                        placeholder = strings.choosePassword,
                         value = state.password,
                         onValueChange = onPasswordChanged,
                         errorText = state.passwordError,
@@ -156,7 +158,7 @@ private fun RegisterScreenContent(
 
                 Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                                text = "Cinsiyet",
+                                text = strings.gender,
                                 style =
                                         MaterialTheme.typography.bodyMedium.copy(
                                                 color = NinjaTextSecondary
@@ -165,12 +167,12 @@ private fun RegisterScreenContent(
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 GenderChip(
-                                        text = "Erkek",
+                                        text = strings.male,
                                         isSelected = state.gender == Gender.MALE,
                                         onClick = { onGenderSelected(Gender.MALE) }
                                 )
                                 GenderChip(
-                                        text = "Kadın",
+                                        text = strings.female,
                                         isSelected = state.gender == Gender.FEMALE,
                                         onClick = { onGenderSelected(Gender.FEMALE) }
                                 )
@@ -189,7 +191,7 @@ private fun RegisterScreenContent(
 
                 Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                                text = "Doğum Tarihi",
+                                text = strings.birthDate,
                                 style =
                                         MaterialTheme.typography.bodyMedium.copy(
                                                 color = NinjaTextSecondary
@@ -216,7 +218,7 @@ private fun RegisterScreenContent(
                                                 state.birthDate?.let {
                                                         "${it.dayOfMonth.toString().padStart(2, '0')}/${it.monthNumber.toString().padStart(2, '0')}/${it.year}"
                                                 }
-                                                        ?: "GG/AA/YYYY"
+                                                        ?: strings.datePlaceholder
 
                                         Text(
                                                 text = dateText,
@@ -264,7 +266,7 @@ private fun RegisterScreenContent(
                                 )
                         } else {
                                 Text(
-                                        text = "Kaydol",
+                                        text = strings.signUpText,
                                         fontWeight = FontWeight.SemiBold,
                                         fontSize = 16.sp
                                 )
@@ -274,9 +276,9 @@ private fun RegisterScreenContent(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 TextButton(onClick = onLoginClick) {
-                        Text(text = "Zaten bir hesabın var mı? ", color = NinjaTextSecondary)
+                        Text(text = strings.alreadyHaveAccount, color = NinjaTextSecondary)
                         Text(
-                                text = "Giriş Yap",
+                                text = strings.login,
                                 color = NinjaPrimary,
                                 fontWeight = FontWeight.SemiBold
                         )
@@ -285,7 +287,7 @@ private fun RegisterScreenContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                        text = "Gizlilik Politikası · Kullanım Koşulları",
+                        text = strings.footerText,
                         style =
                                 MaterialTheme.typography.bodySmall.copy(
                                         color = NinjaTextSecondary,

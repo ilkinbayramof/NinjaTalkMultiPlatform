@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ilkinbayramov.ninjatalk.presentation.shuffle.filter.*
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.localization.LocalAppStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +27,7 @@ fun ShuffleFilterBottomSheet(
         onApplyFilters: ((ShuffleFilterState) -> Unit)? = null,
         viewModel: ShuffleFilterViewModel = ShuffleFilterViewModel()
 ) {
+        val strings = LocalAppStrings.current
         val state by viewModel.uiState.collectAsState()
 
         ModalBottomSheet(
@@ -40,7 +42,7 @@ fun ShuffleFilterBottomSheet(
                                 modifier = Modifier.fillMaxWidth()
                         ) {
                                 Text(
-                                        "Sıfırla",
+                                        strings.reset,
                                         color = NinjaPrimary,
                                         modifier =
                                                 Modifier.weight(1f).clickable {
@@ -48,12 +50,12 @@ fun ShuffleFilterBottomSheet(
                                                 }
                                 )
                                 Text(
-                                        "Filtrele",
+                                        strings.filter,
                                         color = Color.White,
                                         style = MaterialTheme.typography.titleMedium,
                                 )
                                 Text(
-                                        "Kapat",
+                                        strings.close,
                                         color = NinjaPrimary,
                                         modifier = Modifier.weight(1f).clickable { onDismiss() },
                                         textAlign = TextAlign.End
@@ -63,7 +65,7 @@ fun ShuffleFilterBottomSheet(
                         Spacer(Modifier.height(24.dp))
 
                         // AGE
-                        Text("YAŞ", color = NinjaTextSecondary)
+                        Text(strings.age, color = NinjaTextSecondary)
                         RangeSlider(
                                 value = state.minAge..state.maxAge,
                                 onValueChange = {
@@ -93,7 +95,7 @@ fun ShuffleFilterBottomSheet(
 
                         // COUNTRY - Commented out for future use
                         /*
-                        Text("ÜLKE", color = NinjaTextSecondary)
+                        Text(strings.country, color = NinjaTextSecondary)
                         FilterRowItem(
                                 text = state.selectedCountry ?: "Seç",
                                 onClick = {
@@ -105,7 +107,7 @@ fun ShuffleFilterBottomSheet(
                         */
 
                         // GENDER
-                        Text("CİNSİYET", color = NinjaTextSecondary)
+                        Text(strings.gender.uppercase(), color = NinjaTextSecondary)
                         GenderChips(
                                 selected = state.selectedGender,
                                 onSelected = {
@@ -124,7 +126,7 @@ fun ShuffleFilterBottomSheet(
                                 modifier = Modifier.fillMaxWidth().height(54.dp),
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = NinjaPrimary)
-                        ) { Text("Filtreleri Uygula", fontWeight = FontWeight.SemiBold) }
+                        ) { Text(strings.applyFilters, fontWeight = FontWeight.SemiBold) }
 
                         Spacer(Modifier.height(24.dp))
                 }
@@ -153,12 +155,13 @@ private fun FilterRowItem(text: String, onClick: () -> Unit) {
 
 @Composable
 private fun GenderChips(selected: Gender, onSelected: (Gender) -> Unit) {
+        val strings = LocalAppStrings.current
         val options =
                 listOf(
-                        "Tümü" to Gender.ALL,
-                        "Erkek" to Gender.MALE,
-                        "Kadın" to Gender.FEMALE,
-                        "Diğer" to Gender.OTHER
+                        strings.all to Gender.ALL,
+                        strings.male to Gender.MALE,
+                        strings.female to Gender.FEMALE,
+                        strings.other to Gender.OTHER
                 )
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

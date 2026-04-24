@@ -26,6 +26,7 @@ import com.ilkinbayramov.ninjatalk.presentation.shuffle.ShuffleUiEvent
 import com.ilkinbayramov.ninjatalk.presentation.shuffle.ShuffleViewModel
 import com.ilkinbayramov.ninjatalk.ui.shuffle.filter.ShuffleFilterBottomSheet
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.localization.LocalAppStrings
 
 @Composable
 fun ShuffleScreen(
@@ -37,6 +38,7 @@ fun ShuffleScreen(
     val state by viewModel.uiState.collectAsState()
     var showFilterSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val strings = LocalAppStrings.current
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -70,7 +72,7 @@ fun ShuffleScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                    text = "Keşfet",
+                    text = strings.shuffle,
                     color = Color.White,
                     style =
                             MaterialTheme.typography.headlineSmall.copy(
@@ -85,7 +87,7 @@ fun ShuffleScreen(
             OutlinedTextField(
                     value = state.searchQuery,
                     onValueChange = { viewModel.onEvent(ShuffleUiEvent.SearchQueryChanged(it)) },
-                    placeholder = { Text("Kullanıcı adı ara…", color = NinjaTextSecondary) },
+                    placeholder = { Text(strings.searchUsername, color = NinjaTextSecondary) },
                     singleLine = true,
                     shape = RoundedCornerShape(50),
                     modifier = Modifier.fillMaxWidth(),
@@ -120,7 +122,7 @@ fun ShuffleScreen(
                             tint = NinjaTextSecondary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Filtrele", color = Color.White)
+                    Text(text = strings.filter, color = Color.White)
                 }
             }
 
@@ -146,6 +148,7 @@ fun ShuffleScreen(
 
 @Composable
 private fun UserCard(user: User, onClick: () -> Unit = {}) {
+    val strings = LocalAppStrings.current
     // Derive name from email for now
     val displayName = user.email.substringBefore("@").replaceFirstChar { it.uppercase() }
 
@@ -192,7 +195,7 @@ private fun UserCard(user: User, onClick: () -> Unit = {}) {
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                        text = user.bio ?: "Henüz bir biyografi yok.",
+                        text = user.bio ?: strings.noBio,
                         color = NinjaTextSecondary,
                         fontSize = 14.sp,
                         maxLines = 2

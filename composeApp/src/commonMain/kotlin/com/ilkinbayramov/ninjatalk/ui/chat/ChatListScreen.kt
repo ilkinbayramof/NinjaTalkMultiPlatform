@@ -24,11 +24,13 @@ import com.ilkinbayramov.ninjatalk.data.dto.Conversation
 import com.ilkinbayramov.ninjatalk.data.repository.ChatRepository
 import com.ilkinbayramov.ninjatalk.presentation.chat.ChatListViewModel
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.localization.LocalAppStrings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun ChatListScreen(onConversationClick: (String) -> Unit) {
+    val strings = LocalAppStrings.current
     val viewModel = remember { ChatListViewModel(ChatRepository()) }
     val state by viewModel.uiState.collectAsState()
     var conversationToDelete by remember { mutableStateOf<Conversation?>(null) }
@@ -50,7 +52,7 @@ fun ChatListScreen(onConversationClick: (String) -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                    text = "Mesajlar",
+                    text = strings.chats,
                     color = Color.White,
                     style =
                             MaterialTheme.typography.headlineSmall.copy(
@@ -67,7 +69,7 @@ fun ChatListScreen(onConversationClick: (String) -> Unit) {
                 }
             } else if (state.conversations.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "Henüz mesajınız yok", color = NinjaTextSecondary, fontSize = 16.sp)
+                    Text(text = strings.noMessages, color = NinjaTextSecondary, fontSize = 16.sp)
                 }
             } else {
                 LazyColumn(
@@ -110,7 +112,7 @@ fun ChatListScreen(onConversationClick: (String) -> Unit) {
                                     ) {
                                         Icon(
                                                 imageVector = Icons.Default.Delete,
-                                                contentDescription = "Sil",
+                                                contentDescription = strings.delete,
                                                 tint = Color.White,
                                                 modifier = Modifier.size(32.dp)
                                         )
@@ -136,9 +138,9 @@ fun ChatListScreen(onConversationClick: (String) -> Unit) {
                     showDeleteDialog = false
                     conversationToDelete = null
                 },
-                title = { Text("Sohbeti Sil") },
+                title = { Text(strings.deleteChat) },
                 text = {
-                    Text("Bu sohbeti silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")
+                    Text(strings.deleteChatConfirm)
                 },
                 confirmButton = {
                     TextButton(
@@ -149,7 +151,7 @@ fun ChatListScreen(onConversationClick: (String) -> Unit) {
                                     conversationToDelete = null
                                 }
                             }
-                    ) { Text("Sil", color = Color.Red) }
+                    ) { Text(strings.delete, color = Color.Red) }
                 },
                 dismissButton = {
                     TextButton(
@@ -157,7 +159,7 @@ fun ChatListScreen(onConversationClick: (String) -> Unit) {
                                 showDeleteDialog = false
                                 conversationToDelete = null
                             }
-                    ) { Text("İptal") }
+                    ) { Text(strings.cancel) }
                 }
         )
     }
@@ -165,6 +167,7 @@ fun ChatListScreen(onConversationClick: (String) -> Unit) {
 
 @Composable
 private fun ConversationItem(conversation: Conversation, onClick: () -> Unit) {
+    val strings = LocalAppStrings.current
     Surface(
             shape = RoundedCornerShape(16.dp),
             color = NinjaSurface,
@@ -214,7 +217,7 @@ private fun ConversationItem(conversation: Conversation, onClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                        text = conversation.lastMessage ?: "Henüz mesaj yok",
+                        text = conversation.lastMessage ?: strings.noMessages,
                         color = NinjaTextSecondary,
                         fontSize = 14.sp,
                         maxLines = 1,

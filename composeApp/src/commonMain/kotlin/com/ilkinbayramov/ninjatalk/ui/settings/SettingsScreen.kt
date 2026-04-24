@@ -21,7 +21,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.sp
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.localization.*
+import com.ilkinbayramov.ninjatalk.LocalLanguageController
 import kotlinx.coroutines.launch
 
 @Composable
@@ -31,6 +34,9 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
         var showPasswordChange by remember { mutableStateOf(false) }
         var showBlockedUsers by remember { mutableStateOf(false) }
         var showPrivacyPolicy by remember { mutableStateOf(false) }
+        var showLanguageDialog by remember { mutableStateOf(false) }
+        val strings = LocalAppStrings.current
+        val changeLanguage = LocalLanguageController.current
 
         if (showProfileEdit) {
                 com.ilkinbayramov.ninjatalk.ui.settings.profile.ProfileEditScreen(
@@ -61,24 +67,24 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
         }
 
         // All settings items with their categories
-        val allSettings = remember {
+        val allSettings = remember(strings) {
                 listOf(
                         SettingCategory(
-                                "Hesap",
+                                strings.account,
                                 listOf(
                                         SettingItemData(
-                                                "Profil Bilgileri",
-                                                "Kullanıcı Adı, Biyografi",
+                                                strings.profileInfo,
+                                                strings.profileInfoDesc,
                                                 Icons.Default.Person
                                         ),
-                                        SettingItemData("Şifre Değiştir", null, Icons.Default.Lock)
+                                        SettingItemData(strings.changePassword, null, Icons.Default.Lock)
                                 )
                         ),
                         SettingCategory(
-                                "Bildirimler",
+                                strings.notifications,
                                 listOf(
                                         SettingItemData(
-                                                "Anlık Bildirimler",
+                                                strings.notifications,
                                                 null,
                                                 Icons.Default.Notifications,
                                                 isToggle = true
@@ -86,24 +92,24 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                                 )
                         ),
                         SettingCategory(
-                                "Gizlilik ve Güvenlik",
+                                strings.privacyPolicy,
                                 listOf(
                                         SettingItemData(
-                                                "Engellenen Kullanıcılar",
+                                                strings.blockedUsers,
                                                 null,
                                                 Icons.Default.Block
                                         ),
                                         SettingItemData(
-                                                "Gizlilik Politikası",
+                                                strings.privacyPolicy,
                                                 null,
                                                 Icons.Default.Security
                                         )
                                 )
                         ),
                         SettingCategory(
-                                "Uygulama",
+                                strings.application,
                                 listOf(
-                                        SettingItemData("Dil", null, Icons.Default.Language),
+                                        SettingItemData(strings.language, null, Icons.Default.Language),
                                 )
                         )
                 )
@@ -141,7 +147,7 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
 
                 // Title
                 Text(
-                        text = "Ayarlar",
+                        text = strings.settingsTitle,
                         color = Color.White,
                         style =
                                 MaterialTheme.typography.headlineSmall.copy(
@@ -156,7 +162,7 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                 OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
-                        placeholder = { Text("Ayarlarda ara", color = NinjaTextSecondary) },
+                        placeholder = { Text(strings.searchSettings, color = NinjaTextSecondary) },
                         leadingIcon = {
                                 Icon(
                                         Icons.Default.Search,
@@ -219,14 +225,16 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                                                 subtitle = item.subtitle,
                                                 onClick = {
                                                         when (item.title) {
-                                                                "Profil Bilgileri" ->
+                                                                strings.profileInfo ->
                                                                         showProfileEdit = true
-                                                                "Şifre Değiştir" ->
+                                                                strings.changePassword ->
                                                                         showPasswordChange = true
-                                                                "Engellenen Kullanıcılar" ->
+                                                                strings.blockedUsers ->
                                                                         showBlockedUsers = true
-                                                                "Gizlilik Politikası" ->
+                                                                strings.privacyPolicy ->
                                                                         showPrivacyPolicy = true
+                                                                strings.language ->
+                                                                        showLanguageDialog = true
                                                         }
                                                 }
                                         )
@@ -236,7 +244,6 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                         Spacer(modifier = Modifier.height(24.dp))
                 }
 
-                // Show buttons only when not searching
                 if (searchQuery.isBlank()) {
                         // Çıkış Yap Button
                         Button(
@@ -244,7 +251,7 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                                 modifier = Modifier.fillMaxWidth().height(54.dp),
                                 shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = NinjaPrimary)
-                        ) { Text("Çıkış Yap", fontWeight = FontWeight.SemiBold, fontSize = 16.sp) }
+                        ) { Text(strings.logout, fontWeight = FontWeight.SemiBold, fontSize = 16.sp) }
 
                         Spacer(modifier = Modifier.height(12.dp))
 
@@ -257,10 +264,10 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                         if (showDeleteDialog) {
                                 AlertDialog(
                                         onDismissRequest = { showDeleteDialog = false },
-                                        title = { Text("Hesabı Sil", color = Color.White) },
+                                        title = { Text(strings.deleteAccount, color = Color.White) },
                                         text = {
                                                 Text(
-                                                        "Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+                                                        strings.deleteAccountConfirm,
                                                         color = Color.White
                                                 )
                                         },
@@ -297,7 +304,7 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                                                         }
                                                 ) {
                                                         Text(
-                                                                "Sil",
+                                                                strings.delete,
                                                                 color = Color.Red,
                                                                 fontWeight = FontWeight.Bold
                                                         )
@@ -305,7 +312,7 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                                         },
                                         dismissButton = {
                                                 TextButton(onClick = { showDeleteDialog = false }) {
-                                                        Text("İptal", color = Color.White)
+                                                        Text(strings.cancel, color = Color.White)
                                                 }
                                         },
                                         containerColor = NinjaSurface
@@ -315,10 +322,40 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                         TextButton(
                                 onClick = { showDeleteDialog = true },
                                 modifier = Modifier.fillMaxWidth()
-                        ) { Text("Hesabı Sil", color = Color.Red, fontWeight = FontWeight.Medium) }
+                        ) { Text(strings.deleteAccount, color = Color.Red, fontWeight = FontWeight.Medium) }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        if (showLanguageDialog) {
+                AlertDialog(
+                        onDismissRequest = { showLanguageDialog = false },
+                        containerColor = NinjaSurface,
+                        title = { Text(strings.language, color = Color.White) },
+                        text = {
+                                Column {
+                                        AppLanguage.entries.forEach { lang ->
+                                                Text(
+                                                        text = lang.displayName,
+                                                        color = Color.White,
+                                                        modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .clickable {
+                                                                        changeLanguage(lang)
+                                                                        showLanguageDialog = false
+                                                                }
+                                                                .padding(vertical = 12.dp)
+                                                )
+                                        }
+                                }
+                        },
+                        confirmButton = {
+                                TextButton(onClick = { showLanguageDialog = false }) {
+                                        Text(strings.cancel, color = Color.White)
+                                }
+                        }
+                )
         }
 }
 

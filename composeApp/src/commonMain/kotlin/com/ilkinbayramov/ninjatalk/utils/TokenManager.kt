@@ -69,4 +69,19 @@ object TokenManager {
         cachedNotificationsEnabled = enabled
         DataTokenManager().saveNotificationsEnabled(enabled)
     }
+
+    // Language settings
+    private var cachedLanguage: String? = null
+
+    suspend fun getLanguage(): String? {
+        if (cachedLanguage == null) {
+            cachedLanguage = DataTokenManager().getLanguage()
+        }
+        return cachedLanguage
+    }
+
+    suspend fun setLanguage(languageCode: String) {
+        cachedLanguage = languageCode
+        DataTokenManager().saveLanguage(languageCode)
+    }
 }

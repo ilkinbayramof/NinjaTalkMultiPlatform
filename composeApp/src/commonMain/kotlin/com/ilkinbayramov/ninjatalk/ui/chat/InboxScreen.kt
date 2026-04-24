@@ -22,6 +22,7 @@ import com.ilkinbayramov.ninjatalk.data.dto.Message
 import com.ilkinbayramov.ninjatalk.data.repository.ChatRepository
 import com.ilkinbayramov.ninjatalk.presentation.chat.InboxViewModel
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.localization.LocalAppStrings
 import com.ilkinbayramov.ninjatalk.utils.TokenManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -34,9 +35,11 @@ import kotlinx.datetime.toLocalDateTime
 fun InboxScreen(
         conversationId: String,
         otherUserId: String,
-        conversationName: String = "Anonim Sohbet",
+        conversationName: String?,
         onBackClick: () -> Unit
 ) {
+    val strings = LocalAppStrings.current
+    val actualConversationName = conversationName ?: strings.anonymousChat
     val viewModel = remember {
         InboxViewModel(
                 conversationId,
@@ -77,11 +80,10 @@ fun InboxScreen(
     if (showBlockDialog) {
         AlertDialog(
                 onDismissRequest = { showBlockDialog = false },
-                title = { Text("Kullanıcıyı Engelle", color = Color.White) },
+                title = { Text(strings.blockUser, color = Color.White) },
                 text = {
                     Text(
-                            "Bu kullanıcıyı engellemek istediğinizden emin misiniz? " +
-                                    "Engelledikten sonra bu kullanıcıdan mesaj alamayacaksınız.",
+                            strings.blockUserConfirm,
                             color = Color.White
                     )
                 },
@@ -106,11 +108,11 @@ fun InboxScreen(
                                             }
                                 }
                             }
-                    ) { Text("Engelle", color = Color.Red, fontWeight = FontWeight.Bold) }
+                    ) { Text(strings.block, color = Color.Red, fontWeight = FontWeight.Bold) }
                 },
                 dismissButton = {
                     TextButton(onClick = { showBlockDialog = false }) {
-                        Text("İptal", color = Color.White)
+                        Text(strings.cancel, color = Color.White)
                     }
                 },
                 containerColor = NinjaSurface
@@ -140,7 +142,7 @@ fun InboxScreen(
                 TopAppBar(
                         title = {
                             Text(
-                                    text = conversationName,
+                                    text = actualConversationName,
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold
                             )
@@ -149,7 +151,7 @@ fun InboxScreen(
                             IconButton(onClick = onBackClick) {
                                 Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "Back",
+                                        contentDescription = strings.back,
                                         tint = Color.White
                                 )
                             }
@@ -201,7 +203,7 @@ fun InboxScreen(
                                                     containerColor = NinjaPrimary
                                             ),
                                     shape = RoundedCornerShape(24.dp)
-                            ) { Text("Engeli Kaldır", color = Color.White) }
+                            ) { Text(strings.unblock, color = Color.White) }
                         }
                     } else {
                         // Normal message input
@@ -215,7 +217,7 @@ fun InboxScreen(
                                     value = messageText,
                                     onValueChange = { messageText = it },
                                     placeholder = {
-                                        Text("Mesajınızı yazın...", color = NinjaTextSecondary)
+                                        Text(strings.typeMessage, color = NinjaTextSecondary)
                                     },
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(24.dp),
@@ -337,11 +339,12 @@ private fun MessageBubble(message: Message, isOwnMessage: Boolean) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ChatOptionsBottomSheet(onDismiss: () -> Unit, onBlock: () -> Unit) {
+    val strings = LocalAppStrings.current
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = NinjaSurface) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             // Block option
             TextButton(onClick = onBlock, modifier = Modifier.fillMaxWidth()) {
-                Text("Engelle", color = Color.Red, fontSize = 16.sp)
+                Text(strings.block, color = Color.Red, fontSize = 16.sp)
             }
         }
     }

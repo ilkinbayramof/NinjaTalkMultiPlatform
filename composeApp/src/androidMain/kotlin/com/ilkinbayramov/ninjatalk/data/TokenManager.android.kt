@@ -59,4 +59,12 @@ actual class TokenManager {
                                 true
                         ) // Default to enabled
                 }
+
+        actual suspend fun saveLanguage(languageCode: String) =
+                withContext(Dispatchers.IO) {
+                        sharedPreferences.edit().putString("app_language", languageCode).apply()
+                }
+
+        actual suspend fun getLanguage(): String? =
+                withContext(Dispatchers.IO) { sharedPreferences.getString("app_language", null) }
 }

@@ -9,4 +9,6 @@ expect class TokenManager() {
     suspend fun clearUserId()
     suspend fun saveNotificationsEnabled(enabled: Boolean)
     suspend fun getNotificationsEnabled(): Boolean
+    suspend fun saveLanguage(languageCode: String)
+    suspend fun getLanguage(): String?
 }

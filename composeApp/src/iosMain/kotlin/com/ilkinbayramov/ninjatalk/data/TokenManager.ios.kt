@@ -35,6 +35,18 @@ actual class TokenManager {
     }
 
     actual suspend fun getNotificationsEnabled(): Boolean {
-        return userDefaults.boolForKey("notifications_enabled") ?: true // Default to enabled
+        // boolForKey returns false if key doesn't exist, we want true as default
+        if (userDefaults.objectForKey("notifications_enabled") == null) {
+            return true
+        }
+        return userDefaults.boolForKey("notifications_enabled")
+    }
+
+    actual suspend fun saveLanguage(languageCode: String) {
+        userDefaults.setObject(languageCode, forKey = "app_language")
+    }
+
+    actual suspend fun getLanguage(): String? {
+        return userDefaults.stringForKey("app_language")
     }
 }

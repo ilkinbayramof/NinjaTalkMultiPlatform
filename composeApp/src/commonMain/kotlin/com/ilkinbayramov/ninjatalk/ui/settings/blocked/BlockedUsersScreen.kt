@@ -19,11 +19,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ilkinbayramov.ninjatalk.data.dto.User
 import com.ilkinbayramov.ninjatalk.ui.theme.*
+import com.ilkinbayramov.ninjatalk.localization.LocalAppStrings
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BlockedUsersScreen(onBackClick: () -> Unit) {
+    val strings = LocalAppStrings.current
     val userRepository = remember { com.ilkinbayramov.ninjatalk.data.repository.UserRepository() }
     var blockedUsers by remember { mutableStateOf<List<User>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -53,12 +55,12 @@ fun BlockedUsersScreen(onBackClick: () -> Unit) {
             containerColor = NinjaBackground,
             topBar = {
                 TopAppBar(
-                        title = { Text("Engellenen Kullanıcılar", color = Color.White) },
+                        title = { Text(strings.blockedUsers, color = Color.White) },
                         navigationIcon = {
                             IconButton(onClick = onBackClick) {
                                 Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "Back",
+                                        contentDescription = strings.back,
                                         tint = Color.White
                                 )
                             }
@@ -81,7 +83,7 @@ fun BlockedUsersScreen(onBackClick: () -> Unit) {
                             horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                                "Engellenmiş kullanıcı yok",
+                                strings.noBlockedUsers,
                                 color = NinjaTextSecondary,
                                 fontSize = 16.sp
                         )
@@ -156,7 +158,7 @@ private fun BlockedUserItem(user: User, onUnblock: () -> Unit) {
             }
 
             TextButton(onClick = onUnblock) {
-                Text("Engeli Kaldır", color = NinjaPrimary, fontSize = 14.sp)
+                Text(LocalAppStrings.current.unblock, color = NinjaPrimary, fontSize = 14.sp)
             }
         }
     }
