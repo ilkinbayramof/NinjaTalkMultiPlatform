@@ -130,6 +130,19 @@ data class AppStrings(
     val chat: String,
     val premium: String,
     val comingSoon: String,
+
+    // Premium / Boost
+    val boostTitle: String,
+    val boostSubtitle: String,
+    val boostMostPopular: String,
+    val boostBestValue: String,
+    val boostMinutes: String,
+    val boostCta: String,
+    val boostRestore: String,
+    val boostPaymentSoon: String,
+    val boostActiveTitle: String,
+    val boostActiveSubtitle: String,
+    val boostRemaining: String,
 )
 
 val trStrings = AppStrings(
@@ -244,6 +257,18 @@ val trStrings = AppStrings(
     chat = "Sohbet",
     premium = "Premium",
     comingSoon = "Yakında",
+
+    boostTitle = "Şimdi Öne Çık!",
+    boostSubtitle = "Profilinin sürekli görünmesini sağla, daha fazla mesaj al!",
+    boostMostPopular = "En Popüler",
+    boostBestValue = "En Kazançlı",
+    boostMinutes = "Dakika",
+    boostCta = "Öne Çık",
+    boostRestore = "Satın Almayı Geri Yükle",
+    boostPaymentSoon = "Ödeme sistemi çok yakında aktif olacak.",
+    boostActiveTitle = "Profilin öne çıkarılıyor",
+    boostActiveSubtitle = "Bu süre boyunca profilin listenin en üstünde görünüyor.",
+    boostRemaining = "Kalan süre",
 )
 
 val azStrings = AppStrings(
@@ -358,6 +383,18 @@ val azStrings = AppStrings(
     chat = "Söhbət",
     premium = "Premium",
     comingSoon = "Tezliklə",
+
+    boostTitle = "İndi Önə Çıx!",
+    boostSubtitle = "Profilinin daim görünməsini təmin et, daha çox mesaj al!",
+    boostMostPopular = "Ən Populyar",
+    boostBestValue = "Ən Sərfəli",
+    boostMinutes = "Dəqiqə",
+    boostCta = "Önə Çıx",
+    boostRestore = "Satınalmanı Bərpa Et",
+    boostPaymentSoon = "Ödəniş sistemi çox yaxında aktiv olacaq.",
+    boostActiveTitle = "Profilin önə çıxarılır",
+    boostActiveSubtitle = "Bu müddət ərzində profilin siyahının ən üstündə görünür.",
+    boostRemaining = "Qalan vaxt",
 )
 
 val LocalAppStrings = staticCompositionLocalOf { trStrings }

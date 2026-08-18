@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.ilkinbayramov.ninjatalk.data.repository.ChatRepository
 import com.ilkinbayramov.ninjatalk.ui.chat.ChatListScreen
 import com.ilkinbayramov.ninjatalk.ui.chat.InboxScreen
+import com.ilkinbayramov.ninjatalk.ui.premium.PremiumScreen
 import com.ilkinbayramov.ninjatalk.ui.settings.SettingsScreen
 import com.ilkinbayramov.ninjatalk.ui.shuffle.ShuffleScreen
 import com.ilkinbayramov.ninjatalk.ui.theme.*
@@ -29,7 +30,7 @@ import kotlinx.coroutines.launch
 sealed class MainTab(val route: String, val label: (AppStrings) -> String, val icon: ImageVector) {
     object Chat : MainTab("chat", { it.chat }, Icons.Default.Chat)
     object Shuffle : MainTab("shuffle", { it.shuffle }, Icons.Default.Shuffle)
-    object Premium : MainTab("premium", { it.premium }, Icons.Default.Star)
+    object Premium : MainTab("premium", { it.premium }, Icons.Default.RocketLaunch)
     object Profile : MainTab("profile", { it.profile }, Icons.Default.Person)
 }
 
@@ -210,7 +211,7 @@ fun MainRoute(onLogout: () -> Unit = {}) {
                                         },
                                         onNavigateToPremium = { selectedTab = MainTab.Premium }
                                 )
-                        MainTab.Premium -> PlaceholderTab("Premium")
+                        MainTab.Premium -> PremiumScreen()
                         MainTab.Profile -> SettingsScreen(onLogout = onLogout)
                     }
                 }
@@ -322,18 +323,5 @@ private fun BottomItem(
                                     .background(NinjaPrimary, RoundedCornerShape(2.dp))
             )
         }
-    }
-}
-
-@Composable
-private fun PlaceholderTab(title: String) {
-    val strings = LocalAppStrings.current
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-                text = "$title\n(${strings.comingSoon})",
-                color = NinjaTextSecondary,
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
     }
 }
