@@ -25,6 +25,11 @@ class RegisterViewModel(private val authRepository: AuthRepository) :
                 setState { copy(password = event.value, passwordError = null) }
             }
 
+            // Username
+            is RegisterUiEvent.UsernameChanged -> {
+                setState { copy(username = event.value, usernameError = null) }
+            }
+
             // Gender
             is RegisterUiEvent.GenderSelected -> {
                 setState { copy(gender = event.gender, genderError = null) }
@@ -79,6 +84,18 @@ class RegisterViewModel(private val authRepository: AuthRepository) :
             hasError = true
         }
 
+        // Username validation - must match the server's own limits
+        val username = state.username.trim()
+        if (username.length !in USERNAME_MIN_LENGTH..USERNAME_MAX_LENGTH) {
+            setState {
+                copy(
+                        usernameError =
+                                "Kullanıcı adı $USERNAME_MIN_LENGTH-$USERNAME_MAX_LENGTH karakter olmalıdır"
+                )
+            }
+            hasError = true
+        }
+
         // Gender validation
         if (state.gender == null) {
             setState { copy(genderError = "Cinsiyet seçin") }
@@ -104,6 +121,7 @@ class RegisterViewModel(private val authRepository: AuthRepository) :
                     .register(
                             email = state.email,
                             password = state.password,
+                            username = username,
                             gender = genderString,
                             birthDate = birthDateString
                     )
@@ -124,6 +142,11 @@ class RegisterViewModel(private val authRepository: AuthRepository) :
                         }
                     }
         }
+    }
+
+    companion object {
+        const val USERNAME_MIN_LENGTH = 2
+        const val USERNAME_MAX_LENGTH = 20
     }
 
     private fun isValidEmail(email: String): Boolean {

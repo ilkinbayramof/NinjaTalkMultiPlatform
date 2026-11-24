@@ -75,6 +75,9 @@ fun RegisterScreen(
                         onPasswordChanged = {
                                 viewModel.onEvent(RegisterUiEvent.PasswordChanged(it))
                         },
+                        onUsernameChanged = {
+                                viewModel.onEvent(RegisterUiEvent.UsernameChanged(it))
+                        },
                         onTogglePasswordVisibility = {
                                 viewModel.onEvent(RegisterUiEvent.TogglePasswordVisibility)
                         },
@@ -94,6 +97,7 @@ private fun RegisterScreenContent(
         state: RegisterUiState,
         onEmailChanged: (String) -> Unit,
         onPasswordChanged: (String) -> Unit,
+        onUsernameChanged: (String) -> Unit,
         onTogglePasswordVisibility: () -> Unit,
         onGenderSelected: (Gender) -> Unit,
         onBirthDateClick: () -> Unit,
@@ -152,6 +156,17 @@ private fun RegisterScreenContent(
                         isPassword = true,
                         isPasswordVisible = state.isPasswordVisible,
                         onTogglePasswordVisibility = onTogglePasswordVisibility
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                NinjaTextField(
+                        label = strings.username,
+                        placeholder = strings.usernamePlaceholder,
+                        value = state.username,
+                        onValueChange = onUsernameChanged,
+                        errorText = state.usernameError,
+                        keyboardType = KeyboardType.Text
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

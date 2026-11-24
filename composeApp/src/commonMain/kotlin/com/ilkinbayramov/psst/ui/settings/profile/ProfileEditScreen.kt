@@ -37,6 +37,9 @@ import kotlinx.serialization.Serializable
 
 expect @Composable fun rememberImagePicker(): ImagePicker
 
+private const val USERNAME_MIN_LENGTH = 2
+private const val USERNAME_MAX_LENGTH = 20
+
 @Composable
 fun ProfileEditScreen(onBackClick: () -> Unit) {
     val strings = LocalAppStrings.current
@@ -64,7 +67,7 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                     .onSuccess { user ->
                         user.bio?.let { bio = it }
                         user.profileImageUrl?.let { profileImageUrl = it }
-                        username = user.email.substringBefore("@")
+                        username = user.displayName
                         isLoading = false
                     }
                     .onFailure {
@@ -204,15 +207,18 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
 
                 OutlinedTextField(
                         value = username,
-                        onValueChange = { },
-                        enabled = false,
+                        onValueChange = { if (it.length <= USERNAME_MAX_LENGTH) username = it },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors =
                                 OutlinedTextFieldDefaults.colors(
-                                        disabledContainerColor = NinjaSurface,
-                                        disabledTextColor = Color.Gray,
-                                        disabledBorderColor = Color.Transparent
+                                        focusedContainerColor = NinjaSurface,
+                                        unfocusedContainerColor = NinjaSurface,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White,
+                                        cursorColor = NinjaPrimary,
+                                        focusedBorderColor = NinjaPrimary,
+                                        unfocusedBorderColor = Color.Transparent
                                 ),
                         singleLine = true
                 )
@@ -257,6 +263,21 @@ fun ProfileEditScreen(onBackClick: () -> Unit) {
                                     if (token == null) {
                                         snackbarHostState.showSnackbar(
                                                 strings.sessionExpired
+                                        )
+                                        return@launch
+                                    }
+
+                                    val trimmedName = username.trim()
+                                    if (trimmedName.length < USERNAME_MIN_LENGTH) {
+                                        snackbarHostState.showSnackbar(strings.usernameTooShort)
+                                        return@launch
+                                    }
+
+                                    val nameResult =
+                                            UserRepository().updateUsername(trimmedName)
+                                    if (nameResult.isFailure) {
+                                        snackbarHostState.showSnackbar(
+                                                "${strings.error}: ${nameResult.exceptionOrNull()?.message}"
                                         )
                                         return@launch
                                     }

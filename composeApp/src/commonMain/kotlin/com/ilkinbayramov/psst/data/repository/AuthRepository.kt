@@ -2,6 +2,7 @@ package com.ilkinbayramov.psst.data.repository
 
 import com.ilkinbayramov.psst.data.ApiClient
 import com.ilkinbayramov.psst.data.dto.AuthResponse
+import com.ilkinbayramov.psst.data.dto.ErrorResponse
 import com.ilkinbayramov.psst.data.dto.ForgotPasswordRequest
 import com.ilkinbayramov.psst.data.dto.LoginRequest
 import com.ilkinbayramov.psst.data.dto.RegisterRequest
@@ -16,26 +17,33 @@ class AuthRepository {
     suspend fun register(
             email: String,
             password: String,
+            username: String,
             gender: String,
             birthDate: String
     ): Result<AuthResponse> {
         return try {
             val response =
-                    client
-                            .post("$baseUrl/api/auth/register") {
-                                contentType(ContentType.Application.Json)
-                                setBody(
-                                        RegisterRequest(
-                                                email = email,
-                                                password = password,
-                                                gender = gender,
-                                                birthDate = birthDate
-                                        )
+                    client.post("$baseUrl/api/auth/register") {
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                                RegisterRequest(
+                                        email = email,
+                                        password = password,
+                                        username = username,
+                                        gender = gender,
+                                        birthDate = birthDate
                                 )
-                            }
-                            .body<AuthResponse>()
+                        )
+                    }
 
-            Result.success(response)
+            // Read the server's own message instead of letting the body parse blow up, so
+            // "Username already taken" actually reaches the user
+            if (!response.status.isSuccess()) {
+                val error: ErrorResponse = response.body()
+                return Result.failure(Exception(error.message))
+            }
+
+            Result.success(response.body<AuthResponse>())
         } catch (e: Exception) {
             Result.failure(e)
         }

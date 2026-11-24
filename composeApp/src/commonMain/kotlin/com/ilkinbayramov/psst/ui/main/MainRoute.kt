@@ -186,10 +186,8 @@ fun MainRoute(onLogout: () -> Unit = {}) {
                                         currentUser = currentUser,
                                         onUserClick = { user ->
                                             // Create or get conversation and navigate to inbox
-                                            // Use real name since user is initiating the chat
-                                            val realName =
-                                                    user.email.substringBefore("@")
-                                                            .replaceFirstChar { it.uppercase() }
+                                            // Use the chosen name since the user is initiating
+                                            val realName = user.displayName
                                             scope.launch {
                                                 val token = TokenManager.getToken()
                                                 if (token != null) {

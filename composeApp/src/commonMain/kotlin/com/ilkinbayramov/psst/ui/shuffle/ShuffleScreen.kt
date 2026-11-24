@@ -149,8 +149,7 @@ fun ShuffleScreen(
 @Composable
 private fun UserCard(user: User, onClick: () -> Unit = {}) {
     val strings = LocalAppStrings.current
-    // Derive name from email for now
-    val displayName = user.email.substringBefore("@").replaceFirstChar { it.uppercase() }
+    val displayName = user.displayName.ifBlank { strings.anonymousChat }
 
     Surface(
             shape = RoundedCornerShape(16.dp),

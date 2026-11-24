@@ -127,6 +127,30 @@ class UserRepository {
         }
     }
 
+    suspend fun updateUsername(username: String): Result<Unit> {
+        return try {
+            val token =
+                    com.ilkinbayramov.psst.utils.TokenManager.getToken()
+                            ?: return Result.failure(Exception("Not authenticated"))
+
+            val response =
+                    client.put("$baseUrl/api/users/username") {
+                        header("Authorization", "Bearer $token")
+                        contentType(ContentType.Application.Json)
+                        setBody(mapOf("username" to username))
+                    }
+
+            if (response.status == HttpStatusCode.OK) {
+                Result.success(Unit)
+            } else {
+                val errorBody: Map<String, String> = response.body()
+                Result.failure(Exception(errorBody["error"] ?: "Failed to update username"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun deleteAccount(): Result<Unit> {
         return try {
             val token =

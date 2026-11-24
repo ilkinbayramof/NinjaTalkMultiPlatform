@@ -143,6 +143,9 @@ data class AppStrings(
     val boostActiveTitle: String,
     val boostActiveSubtitle: String,
     val boostRemaining: String,
+
+    val usernamePlaceholder: String,
+    val usernameTooShort: String
 )
 
 val trStrings = AppStrings(
@@ -269,6 +272,9 @@ val trStrings = AppStrings(
     boostActiveTitle = "Profilin öne çıkarılıyor",
     boostActiveSubtitle = "Bu süre boyunca profilin listenin en üstünde görünüyor.",
     boostRemaining = "Kalan süre",
+
+    usernamePlaceholder = "Bir kullanıcı adı seç",
+    usernameTooShort = "Kullanıcı adı en az 2 karakter olmalıdır",
 )
 
 val azStrings = AppStrings(
@@ -395,6 +401,9 @@ val azStrings = AppStrings(
     boostActiveTitle = "Profilin önə çıxarılır",
     boostActiveSubtitle = "Bu müddət ərzində profilin siyahının ən üstündə görünür.",
     boostRemaining = "Qalan vaxt",
+
+    usernamePlaceholder = "Bir istifadəçi adı seç",
+    usernameTooShort = "İstifadəçi adı ən az 2 simvol olmalıdır",
 )
 
 val LocalAppStrings = staticCompositionLocalOf { trStrings }

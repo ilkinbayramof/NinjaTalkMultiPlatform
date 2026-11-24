@@ -141,7 +141,7 @@ private fun BlockedUserItem(user: User, onUnblock: () -> Unit) {
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                        text = user.email.substringBefore("@"),
+                        text = user.displayName,
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium

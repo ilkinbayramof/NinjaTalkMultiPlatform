@@ -10,12 +10,14 @@ enum class Gender {
 data class RegisterUiState(
         val email: String = "",
         val password: String = "",
+        val username: String = "",
         val gender: Gender? = null,
         val birthDate: LocalDate? = null,
         val isPasswordVisible: Boolean = false,
         val isLoading: Boolean = false,
         val emailError: String? = null,
         val passwordError: String? = null,
+        val usernameError: String? = null,
         val genderError: String? = null,
         val birthDateError: String? = null
 )
@@ -23,6 +25,7 @@ data class RegisterUiState(
 sealed interface RegisterUiEvent {
     data class EmailChanged(val value: String) : RegisterUiEvent
     data class PasswordChanged(val value: String) : RegisterUiEvent
+    data class UsernameChanged(val value: String) : RegisterUiEvent
     data object TogglePasswordVisibility : RegisterUiEvent
     data class GenderSelected(val gender: Gender) : RegisterUiEvent
     data class BirthDateSelected(val date: LocalDate) : RegisterUiEvent
