@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.ilkinbayramov.ninjatalk.ui.theme.*
 import com.ilkinbayramov.ninjatalk.localization.*
 import com.ilkinbayramov.ninjatalk.LocalLanguageController
+import com.ilkinbayramov.ninjatalk.LocalAppLanguage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -37,6 +38,7 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
         var showLanguageDialog by remember { mutableStateOf(false) }
         val strings = LocalAppStrings.current
         val changeLanguage = LocalLanguageController.current
+        val currentLanguage = LocalAppLanguage.current
 
         if (showProfileEdit) {
                 com.ilkinbayramov.ninjatalk.ui.settings.profile.ProfileEditScreen(
@@ -336,17 +338,34 @@ fun SettingsScreen(onLogout: () -> Unit = {}) {
                         text = {
                                 Column {
                                         AppLanguage.entries.forEach { lang ->
-                                                Text(
-                                                        text = lang.displayName,
-                                                        color = Color.White,
+                                                val isSelected = lang == currentLanguage
+                                                val onSelect = {
+                                                        if (!isSelected) changeLanguage(lang)
+                                                        showLanguageDialog = false
+                                                }
+                                                Row(
                                                         modifier = Modifier
                                                                 .fillMaxWidth()
-                                                                .clickable {
-                                                                        changeLanguage(lang)
-                                                                        showLanguageDialog = false
-                                                                }
-                                                                .padding(vertical = 12.dp)
-                                                )
+                                                                .clip(RoundedCornerShape(12.dp))
+                                                                .clickable(onClick = onSelect)
+                                                                .padding(vertical = 4.dp),
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                        RadioButton(
+                                                                selected = isSelected,
+                                                                onClick = onSelect,
+                                                                colors = RadioButtonDefaults.colors(
+                                                                        selectedColor = NinjaPrimary,
+                                                                        unselectedColor = NinjaTextSecondary
+                                                                )
+                                                        )
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                        Text(
+                                                                text = lang.displayName,
+                                                                color = Color.White,
+                                                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                                                        )
+                                                }
                                         }
                                 }
                         },

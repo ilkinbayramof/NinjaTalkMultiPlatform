@@ -17,6 +17,7 @@ import com.ilkinbayramov.ninjatalk.localization.*
 import kotlinx.coroutines.launch
 
 val LocalLanguageController = staticCompositionLocalOf<(AppLanguage) -> Unit> { {} }
+val LocalAppLanguage = compositionLocalOf { AppLanguage.TURKISH }
 
 @Composable
 fun App() {
@@ -55,7 +56,8 @@ fun App() {
 
         CompositionLocalProvider(
             LocalAppStrings provides appStrings,
-            LocalLanguageController provides changeLanguage
+            LocalLanguageController provides changeLanguage,
+            LocalAppLanguage provides currentLanguage
         ) {
             MaterialTheme {
                 when (currentScreen) {
