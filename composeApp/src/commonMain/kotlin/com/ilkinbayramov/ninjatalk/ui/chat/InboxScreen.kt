@@ -9,6 +9,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.EmojiEmotions
+import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -48,7 +54,11 @@ fun InboxScreen(
         )
     }
     val state by viewModel.uiState.collectAsState()
-    var messageText by remember { mutableStateOf("") }
+    var messageField by remember { mutableStateOf(TextFieldValue("")) }
+    val messageText = messageField.text
+    var showEmojiPicker by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -207,6 +217,7 @@ fun InboxScreen(
                         }
                     } else {
                         // Normal message input
+                        Column {
                         Row(
                                 modifier =
                                         Modifier.fillMaxWidth()
@@ -214,12 +225,16 @@ fun InboxScreen(
                                 verticalAlignment = Alignment.CenterVertically
                         ) {
                             OutlinedTextField(
-                                    value = messageText,
-                                    onValueChange = { messageText = it },
+                                    value = messageField,
+                                    onValueChange = { messageField = it },
                                     placeholder = {
                                         Text(strings.typeMessage, color = NinjaTextSecondary)
                                     },
-                                    modifier = Modifier.weight(1f),
+                                    modifier =
+                                            Modifier.weight(1f).onFocusChanged {
+                                                // Klaviatura açılanda emoji panelini bağla
+                                                if (it.isFocused) showEmojiPicker = false
+                                            },
                                     shape = RoundedCornerShape(24.dp),
                                     colors =
                                             OutlinedTextFieldDefaults.colors(
@@ -236,11 +251,25 @@ fun InboxScreen(
                             Spacer(modifier = Modifier.width(8.dp))
 
                             // Emoji button
-                            IconButton(onClick = { /* TODO: Show emoji picker */}) {
+                            IconButton(
+                                    onClick = {
+                                        if (showEmojiPicker) {
+                                            showEmojiPicker = false
+                                        } else {
+                                            keyboardController?.hide()
+                                            focusManager.clearFocus()
+                                            showEmojiPicker = true
+                                        }
+                                    }
+                            ) {
                                 Icon(
-                                        imageVector = Icons.Default.EmojiEmotions,
+                                        imageVector =
+                                                if (showEmojiPicker) Icons.Default.Keyboard
+                                                else Icons.Default.EmojiEmotions,
                                         contentDescription = "Emoji",
-                                        tint = NinjaTextSecondary
+                                        tint =
+                                                if (showEmojiPicker) NinjaPrimary
+                                                else NinjaTextSecondary
                                 )
                             }
 
@@ -249,7 +278,7 @@ fun InboxScreen(
                                     onClick = {
                                         if (messageText.isNotBlank()) {
                                             viewModel.sendMessage(messageText)
-                                            messageText = ""
+                                            messageField = TextFieldValue("")
                                         }
                                     },
                                     enabled = messageText.isNotBlank() && !state.isSending
@@ -262,6 +291,24 @@ fun InboxScreen(
                                                 else NinjaTextSecondary
                                 )
                             }
+                        }
+
+                        if (showEmojiPicker) {
+                            EmojiPicker(
+                                    onEmojiSelected = { emoji ->
+                                        // Emojini kursorun olduğu yerə əlavə et
+                                        val text = messageField.text
+                                        val start = messageField.selection.min.coerceIn(0, text.length)
+                                        val end = messageField.selection.max.coerceIn(0, text.length)
+                                        val newText = text.replaceRange(start, end, emoji)
+                                        messageField =
+                                                TextFieldValue(
+                                                        text = newText,
+                                                        selection = TextRange(start + emoji.length)
+                                                )
+                                    }
+                            )
+                        }
                         }
                     }
                 }
