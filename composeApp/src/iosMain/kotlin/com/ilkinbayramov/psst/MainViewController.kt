@@ -1,0 +1,5 @@
+package com.ilkinbayramov.psst
+
+import androidx.compose.ui.window.ComposeUIViewController
+
+fun MainViewController() = ComposeUIViewController { App() }

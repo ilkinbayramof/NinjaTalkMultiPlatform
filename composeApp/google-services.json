@@ -1,29 +1,48 @@
 {
-    "project_info": {
-        "project_number": "827642381500",
-        "project_id": "ninjatalk-f6950",
-        "storage_bucket": "ninjatalk-f6950.firebasestorage.app"
-    },
-    "client": [
-        {
-            "client_info": {
-                "mobilesdk_app_id": "1:827642381500:android:fad6fc0f53ae77dab3fcb9",
-                "android_client_info": {
-                    "package_name": "com.ilkinbayramov.ninjatalk"
-                }
-            },
-            "oauth_client": [],
-            "api_key": [
-                {
-                    "current_key": "AIzaSyChNKQvJw5SxymEroiVKCxB714tyNEF554"
-                }
-            ],
-            "services": {
-                "appinvite_service": {
-                    "other_platform_oauth_client": []
-                }
-            }
+  "project_info": {
+    "project_number": "827642381500",
+    "project_id": "ninjatalk-f6950",
+    "storage_bucket": "ninjatalk-f6950.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:827642381500:android:fad6fc0f53ae77dab3fcb9",
+        "android_client_info": {
+          "package_name": "com.ilkinbayramov.ninjatalk"
         }
-    ],
-    "configuration_version": "1"
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChNKQvJw5SxymEroiVKCxB714tyNEF554"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:827642381500:android:7b233d4b73975de4b3fcb9",
+        "android_client_info": {
+          "package_name": "com.ilkinbayramov.psst"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChNKQvJw5SxymEroiVKCxB714tyNEF554"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
 }

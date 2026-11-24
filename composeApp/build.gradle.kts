@@ -87,11 +87,11 @@ kotlin {
 }
 
 android {
-    namespace = "com.ilkinbayramov.ninjatalk"
+    namespace = "com.ilkinbayramov.psst"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.ilkinbayramov.ninjatalk"
+        applicationId = "com.ilkinbayramov.psst"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1

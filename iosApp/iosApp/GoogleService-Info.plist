@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.ilkinbayramov.ninjatalk.NinjaTalk</string>
+	<string>com.ilkinbayramov.psst</string>
 	<key>PROJECT_ID</key>
 	<string>ninjatalk-f6950</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:827642381500:ios:a0d726c225b5e538b3fcb9</string>
+	<string>1:827642381500:ios:59da1ff48bf7ead8b3fcb9</string>
 </dict>
 </plist>

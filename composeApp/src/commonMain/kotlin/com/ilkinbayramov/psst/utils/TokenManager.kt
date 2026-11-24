@@ -1,0 +1,87 @@
+package com.ilkinbayramov.psst.utils
+
+import com.ilkinbayramov.psst.data.TokenManager as DataTokenManager
+
+object TokenManager {
+    private var cachedToken: String? = null
+    private var cachedUserId: String? = null
+
+    suspend fun getToken(): String? {
+        if (cachedToken == null) {
+            cachedToken = DataTokenManager().getToken()
+        }
+        return cachedToken
+    }
+
+    suspend fun saveToken(token: String) {
+        cachedToken = token
+        DataTokenManager().saveToken(token)
+        // Extract user ID from JWT token (simplified - in production use proper JWT parsing)
+        cachedUserId = extractUserIdFromToken(token)
+    }
+
+    suspend fun clearToken() {
+        cachedToken = null
+        cachedUserId = null
+        DataTokenManager().clearToken()
+        DataTokenManager().clearUserId()
+    }
+
+    suspend fun getUserId(): String? {
+        if (cachedUserId == null) {
+            cachedUserId = DataTokenManager().getUserId()
+        }
+        return cachedUserId
+    }
+
+    private fun extractUserIdFromToken(token: String): String? {
+        return try {
+            // JWT format: header.payload.signature
+            val parts = token.split(".")
+            if (parts.size != 3) return null
+
+            // Decode base64 payload (simplified)
+            val payload = parts[1]
+            // In production, properly decode and parse JSON
+            // For now, we'll set it when user logs in
+            null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun setUserId(userId: String) {
+        cachedUserId = userId
+        DataTokenManager().saveUserId(userId)
+    }
+
+    // Notification settings
+    private var cachedNotificationsEnabled: Boolean? = null
+
+    suspend fun getNotificationsEnabled(): Boolean {
+        if (cachedNotificationsEnabled == null) {
+            cachedNotificationsEnabled = DataTokenManager().getNotificationsEnabled()
+        }
+        return cachedNotificationsEnabled ?: true // Default to enabled
+    }
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        cachedNotificationsEnabled = enabled
+        DataTokenManager().saveNotificationsEnabled(enabled)
+    }
+
+    // Language settings
+    private var cachedLanguage: String? = null
+
+    suspend fun getLanguage(): String? {
+        if (cachedLanguage == null) {
+            cachedLanguage = DataTokenManager().getLanguage()
+        }
+        return cachedLanguage
+    }
+
+    suspend fun setLanguage(languageCode: String) {
+        cachedLanguage = languageCode
+        DataTokenManager().saveLanguage(languageCode)
+    }
+}

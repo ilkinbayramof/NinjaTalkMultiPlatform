@@ -1,4 +1,4 @@
-rootProject.name = "NinjaTalk"
+rootProject.name = "Psst"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
